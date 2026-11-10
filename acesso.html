@@ -70,10 +70,10 @@
       <p>Entre com o usuário e a senha do acesso master.</p>
       <div class="campo"><label for="a-usuario">Usuário</label><input id="a-usuario" name="usuario" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required maxlength="80"></div>
       <div class="campo"><label for="a-senha">Senha</label><div class="senha"><input id="a-senha" name="senha" type="password" autocomplete="current-password" required maxlength="120"><button type="button" class="ver" id="ver-senha" aria-controls="a-senha" aria-pressed="false">Mostrar</button></div></div>
-      <label class="lembrar"><input type="checkbox" name="manter" checked> Manter conectado neste aparelho</label>
+      <label class="lembrar"><input type="checkbox" name="manter"> Manter conectado neste aparelho</label>
       <p class="erro" id="erro" role="alert"></p>
       <button class="botao botao-roxo largo" id="entrar" type="submit">Entrar</button>
-      <p class="rodape-acesso">Em computador compartilhado, desmarque “Manter conectado”. Para sair depois, use <b>Minha clínica › Sair do acesso master</b>.</p>
+      <p class="rodape-acesso">Sem marcar “Manter conectado”, a senha é pedida de novo sempre que o navegador for fechado. Para sair antes, use <b>Minha clínica › Sair do acesso master</b>.</p>
     </form>
   </main>
   <script type="module" src="./acesso.js"></script>
