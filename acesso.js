@@ -10,9 +10,7 @@ function destino() {
   const v = new URLSearchParams(location.search).get('volta') || '';
   return /^(index|sistema)\.html(?:[?#].*)?$/.test(v) ? './' + v : './index.html';
 }
-function lerToken() { try { return localStorage.getItem(A.armazenamento) || sessionStorage.getItem(A.armazenamento); } catch { return null; } }
-
-if (!A.ativo || lerToken() === A.chave) location.replace(destino());
+if (!A.ativo || A.valido()) location.replace(destino());
 
 $('#fila').innerHTML = ['brocolis', 'morango', 'cenoura', 'banana', 'ovo'].map(id => `<span>${iconeAlimento(id)}</span>`).join('');
 
@@ -34,7 +32,7 @@ form.addEventListener('submit', ev => {
   setTimeout(() => {
     const ok = derivarChave(usuario, s) === A.chave;
     if (ok) {
-      try { (form.manter.checked ? localStorage : sessionStorage).setItem(A.armazenamento, A.chave); } catch { /* sem armazenamento */ }
+      A.sair(); A.entrar();
       botao.textContent = 'Entrando…';
       location.replace(destino());
       return;

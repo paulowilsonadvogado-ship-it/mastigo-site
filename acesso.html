@@ -22,7 +22,7 @@
     .etiqueta{display:inline-block;font:600 13px/1 var(--texto);letter-spacing:.12em;text-transform:uppercase;color:var(--amarelo);border:1.5px solid rgba(255,196,0,.45);border-radius:999px;padding:8px 14px;margin-bottom:22px}
     .bastidor h1{color:var(--branco);font-size:clamp(34px,4.2vw,52px);line-height:1.08;margin-bottom:18px}
     .bastidor h1 em{font-style:normal;color:var(--rosa);white-space:nowrap}
-    .cartao-acesso .erro{margin-bottom:6px}
+    .cartao-acesso .erro{margin:4px 0 8px}
     .bastidor p{font-size:17px;color:#d9ccf5;max-width:26rem}
     .fila{display:flex;gap:14px;align-items:flex-end;margin-top:34px;position:relative;z-index:1}
     .fila span{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.08);display:grid;place-items:center}
@@ -36,8 +36,6 @@
     .senha{position:relative}
     .senha input{width:100%;padding-right:86px}
     .ver{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;font:600 14px var(--texto);color:var(--roxo);padding:8px 10px;cursor:pointer;border-radius:10px}
-    .lembrar{display:flex;gap:10px;align-items:center;font-size:15px;margin:4px 0 14px;cursor:pointer}
-    .lembrar input{width:20px;height:20px;accent-color:var(--roxo)}
     .rodape-acesso{margin-top:22px;font-size:14px;color:var(--suave)}
     @media(max-width:860px){
       body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
@@ -70,10 +68,9 @@
       <p>Entre com o usuário e a senha do acesso master.</p>
       <div class="campo"><label for="a-usuario">Usuário</label><input id="a-usuario" name="usuario" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required maxlength="80"></div>
       <div class="campo"><label for="a-senha">Senha</label><div class="senha"><input id="a-senha" name="senha" type="password" autocomplete="current-password" required maxlength="120"><button type="button" class="ver" id="ver-senha" aria-controls="a-senha" aria-pressed="false">Mostrar</button></div></div>
-      <label class="lembrar"><input type="checkbox" name="manter"> Manter conectado neste aparelho</label>
       <p class="erro" id="erro" role="alert"></p>
       <button class="botao botao-roxo largo" id="entrar" type="submit">Entrar</button>
-      <p class="rodape-acesso">Sem marcar “Manter conectado”, a senha é pedida de novo sempre que o navegador for fechado. Para sair antes, use <b>Minha clínica › Sair do acesso master</b>.</p>
+      <p class="rodape-acesso">A senha é pedida a cada entrada: em cada aba nova e sempre que o site ficar 30 minutos sem uso. Para sair antes, use <b>Minha clínica › Sair do acesso master</b>.</p>
     </form>
   </main>
   <script type="module" src="./acesso.js"></script>

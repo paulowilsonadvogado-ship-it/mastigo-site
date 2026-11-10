@@ -108,7 +108,7 @@ export function createModulos(ctx) {
   // Pré-lançamento: quem entrou com o acesso master pode sair por aqui (ver acesso-guarda.js)
   function cartaoAcessoMaster() {
     if (!window.MASTIGO_ACESSO?.ativo) return '';
-    return `<section class="card"><h2>Acesso master do pré-lançamento</h2><p>Enquanto o Mastigô não é aberto ao público, o site pede o usuário e a senha da equipe. Saia ao terminar se este aparelho for compartilhado.</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
+    return `<section class="card"><h2>Acesso master do pré-lançamento</h2><p>Enquanto o Mastigô não é aberto ao público, o site pede o usuário e a senha da equipe a cada entrada (em cada aba nova e depois de 30 minutos sem uso).</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
   }
   const cartaoAssinatura = () => cartaoPlano() + cartaoAcessoMaster();
   // Volta do cadastro (?assinatura=teste) ou do Mercado Pago (?assinatura=ok): ativa o teste,
@@ -185,8 +185,7 @@ export function createModulos(ctx) {
     },
     onClick(el) {
       if (el.dataset.action === 'sair-master') {
-        const k = window.MASTIGO_ACESSO?.armazenamento;
-        try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch { /* sem armazenamento */ }
+        window.MASTIGO_ACESSO?.sair?.();
         location.replace('./acesso.html?volta=sistema.html');
         return true;
       }
