@@ -65,7 +65,7 @@ mod.garantirEstado();
 function render(){
  mod.garantirEstado();
  const telaFamilia=mod.tela(page);if(telaFamilia){$('#app').innerHTML=telaFamilia;return;}
- const grupos=[['ACOMPANHAMENTO',[['overview','grid'],['patients','users'],['agenda','calendar']]],['ATENDIMENTO',[['anamnese','clipboard'],['plano','plate'],['prescricao','pen'],['progress','chart'],['diary','book'],['foods','leaf']]],['FAMÍLIA E GESTÃO',[['familias','heart'],['financeiro','money']]]];
+ const grupos=[['ACOMPANHAMENTO',[['overview','grid'],['patients','users'],['agenda','calendar']]],['ATENDIMENTO',[['anamnese','clipboard'],['trilha','spark'],['plano','plate'],['prescricao','pen'],['progress','chart'],['diary','book'],['foods','leaf']]],['FAMÍLIA E GESTÃO',[['familias','heart'],['financeiro','money']]]];
  const avisar=mod.pendentesAviso(),perf=state.perfil||{},nomeProf=perf.nome||state.professional,registro=perf.crn?`Nutricionista · CRN-${perf.regiaoCrn} ${perf.crn}`:'Nutricionista';
  const badge=id=>id==='patients'?`<span class="count">${state.patients.length}</span>`:id==='familias'&&avisar?`<span class="count wa" title="${avisar} família(s) com novidades para avisar no WhatsApp" aria-label="${avisar} para avisar no WhatsApp">${avisar}</span>`:'';
  const navHTML=grupos.map(([titulo,itens],i)=>`<div class="nav-caption"${i?' style="margin-top:22px"':''}>${titulo}</div><nav class="nav" aria-label="${titulo.toLowerCase()}">${itens.map(([id,ico])=>`<button data-page="${id}" class="${page===id?'active':''}" ${page===id?'aria-current="page"':''}>${icon(ico)}${pages[id]}${badge(id)}</button>`).join('')}</nav>`).join('');

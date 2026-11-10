@@ -5,6 +5,7 @@ import { createPlano } from './plano.js';
 import { createPrescricao } from './prescricao.js';
 import { createPortal } from './portal.js';
 import { createBiblioteca } from './biblioteca.js';
+import { createTrilha, trilhaDemo } from './trilha.js';
 import { perfilPadrao, lerImagem, uid } from './util-nutri.js';
 import { SITE } from './config-site.js';
 import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js';
@@ -14,6 +15,7 @@ export const paginasOcultas = { entrar: 'Área da família' };
 
 export const paginasConsultorio = {
   anamnese: ['Anamnese', 'clipboard'],
+  trilha: ['Trilha alimentar', 'spark'],
   plano: ['Plano alimentar', 'plate'],
   prescricao: ['Prescrição', 'pen'],
   familias: ['Portal da família', 'heart'],
@@ -46,11 +48,11 @@ export function createModulos(ctx) {
   // Criança selecionada: uma só para o sistema todo (o app.js liga ao seletor das telas antigas)
   if (!ctx.sel) ctx.sel = { id: null };
   const financeiro = createFinanceiro(ctx), anamnese = createAnamnese(ctx), plano = createPlano(ctx), prescricao = createPrescricao(ctx, plano);
-  const portal = createPortal(ctx, plano), biblioteca = createBiblioteca(ctx);
+  const portal = createPortal(ctx, plano), biblioteca = createBiblioteca(ctx), trilha = createTrilha(ctx);
   ctx.publicarFamilia = portal.publicar;
   ctx.abrirBiblioteca = aba => biblioteca.abrir(aba);
-  const modulos = [portal, biblioteca, financeiro, anamnese, plano, prescricao];
-  const renderizadores = { financeiro: financeiro.page, anamnese: anamnese.page, plano: plano.page, prescricao: prescricao.page, familias: portal.page };
+  const modulos = [portal, biblioteca, financeiro, anamnese, plano, prescricao, trilha];
+  const renderizadores = { financeiro: financeiro.page, anamnese: anamnese.page, trilha: trilha.page, plano: plano.page, prescricao: prescricao.page, familias: portal.page };
 
   function garantirEstado() {
     const s = ctx.state;
@@ -60,6 +62,7 @@ export function createModulos(ctx) {
     if (!s.anamneses) { s.anamneses = {}; if (s.patients.some(p => p.id === 'p1')) s.anamneses.p1 = anamneseDemo(); }
     if (!s.planos) { s.planos = {}; if (s.anamneses.p1) s.planos.p1 = planoDemo(); }
     if (!s.prescricoes) s.prescricoes = [];
+    if (!s.trilhas) { s.trilhas = {}; if (s.patients.some(p => p.id === 'p1')) s.trilhas.p1 = trilhaDemo(); }
     if (!s.alimentosProprios) s.alimentosProprios = [];
     if (!s.acessos) s.acessos = {};
     if (!s.acessos.p1 && !s.acessoDemoCriado) {
