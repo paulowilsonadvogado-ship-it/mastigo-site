@@ -338,3 +338,14 @@ td.n{font-weight:500}
 .alvo strong .ico-alimento,.fam-alvo h3 .ico-alimento{width:32px;height:32px}
 .vl-alvo b{display:inline-flex;align-items:center;gap:6px}.vl-alvo .ico-alimento{width:24px;height:24px}
 .food-choice{background:#fff}.food-choice.selected{background:#f4ecff;border-color:#7b2ff7;box-shadow:0 0 0 1px #7b2ff7}
+/* Assinatura: selo no topo e cartão em Minha clínica */
+a.badge{text-decoration:none}
+button.badge{cursor:pointer;font-family:inherit}
+.badge.selo-teste{background:#f1e9ff;color:#5b16d0;border-color:#e2d3ff}
+.badge.selo-pendente{background:#fff0e3;color:#b4520a;border-color:#ffd9b8}
+.badge.selo-ativa{background:#e6f8f4;color:#00796b;border-color:#c5ede4}
+.cartao-assinatura .assinatura-dados{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px;margin:0 0 18px;padding:16px 18px;background:#f8f5ff;border:1px solid #ece3ff;border-radius:12px}
+.cartao-assinatura .assinatura-dados dt{font-size:11px;color:var(--muted);margin-bottom:4px}
+.cartao-assinatura .assinatura-dados dd{margin:0;font-size:13px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
+.cartao-assinatura .helper{margin:14px 0 0}
+@media(max-width:640px){.cartao-assinatura .assinatura-dados{grid-template-columns:1fr}}

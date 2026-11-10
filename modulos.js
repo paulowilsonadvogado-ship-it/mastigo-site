@@ -6,6 +6,9 @@ import { createPrescricao } from './prescricao.js';
 import { createPortal } from './portal.js';
 import { createBiblioteca } from './biblioteca.js';
 import { perfilPadrao, lerImagem, uid } from './util-nutri.js';
+import { SITE } from './config-site.js';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js';
+import { formatarTelefone } from './whatsapp.js';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -77,6 +80,61 @@ export function createModulos(ctx) {
     if (!s.perfil.nome && s.professional) s.perfil.nome = s.professional;
   }
 
+  // ===== Assinatura do profissional: teste grátis de 7 dias e depois mensal =====
+  const DIA = 86400000;
+  const ultimoDiaTeste = c => new Date(new Date(c.fimTeste).getTime() - DIA).toISOString();
+  function seloAssinatura() {
+    const c = lerConta(), st = situacao(c), e = ctx.esc;
+    if (st === 'sem-conta') return `<a class="badge" href="./index.html#comecar" title="Começar o teste grátis de ${SITE.diasTeste} dias"><span class="dot"></span>Demonstração</a>`;
+    if (st === 'aguardando-cartao') return `<a class="badge selo-pendente" href="${e(SITE.checkoutUrl)}"><span class="dot"></span>Cadastrar cartão</a>`;
+    if (st === 'teste') { const d = diasRestantes(c); return `<button class="badge selo-teste" data-page="settings" title="Ver a assinatura"><span class="dot"></span>Teste grátis · ${d === 1 ? 'último dia' : `faltam ${d} dias`}</button>`; }
+    return `<button class="badge selo-ativa" data-page="settings"><span class="dot"></span>Assinatura mensal</button>`;
+  }
+  function cartaoPlano() {
+    const c = lerConta(), st = situacao(c), e = ctx.esc, preco = moedaBR(SITE.preco);
+    if (st === 'sem-conta') return `<section class="card cartao-assinatura"><h2>Sua assinatura</h2><p>Você está usando a demonstração aberta. Para usar como sua, comece o teste grátis de ${SITE.diasTeste} dias: depois dele, ${preco} por mês, e você cancela quando quiser.</p><a class="button primary" href="./index.html#comecar">Começar o teste grátis</a></section>`;
+    const linhas = [['Plano', `Mastigô · ${preco} por mês`], ['Titular', `${e(c.nome)} · ${e(c.email)}`],
+      ['Teste grátis', `de ${dataBR(c.inicioTeste)} até ${dataBR(ultimoDiaTeste(c))}`],
+      ['Primeira cobrança', st === 'assinatura' ? `feita em ${dataBR(c.fimTeste)}, depois todo mês` : `${dataBR(c.fimTeste)}, depois todo mês no mesmo dia`]];
+    const situacaoTxt = { 'aguardando-cartao': 'Falta cadastrar o cartão no Mercado Pago para o teste começar.', teste: `Teste em andamento: ${diasRestantes(c) === 1 ? 'hoje é o último dia' : `faltam ${diasRestantes(c)} dias`}.`, assinatura: 'Assinatura ativa.' }[st];
+    const cancelar = SITE.checkoutUrl
+      ? `<p class="helper">Para trocar o cartão ou cancelar, entre no Mercado Pago (aplicativo ou site), menu <b>Assinaturas</b>. Cancelando até ${dataBR(ultimoDiaTeste(c))}, nada é cobrado.</p>`
+      : `<p class="helper">Fase de lançamento: o cadastro do cartão ainda não está ativo, então nada será cobrado sem você antes cadastrar o cartão no Mercado Pago.</p>`;
+    return `<section class="card cartao-assinatura"><h2>Sua assinatura</h2><p>${situacaoTxt}</p><dl class="assinatura-dados">${linhas.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>${st === 'aguardando-cartao' ? `<a class="button primary" href="${e(SITE.checkoutUrl)}">Cadastrar o cartão no Mercado Pago</a>` : ''}${cancelar}</section>`;
+  }
+  // Pré-lançamento: quem entrou com o acesso master pode sair por aqui (ver acesso-guarda.js)
+  function cartaoAcessoMaster() {
+    if (!window.MASTIGO_ACESSO?.ativo) return '';
+    return `<section class="card"><h2>Acesso master do pré-lançamento</h2><p>Enquanto o Mastigô não é aberto ao público, o site pede o usuário e a senha da equipe. Saia ao terminar se este aparelho for compartilhado.</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
+  }
+  const cartaoAssinatura = () => cartaoPlano() + cartaoAcessoMaster();
+  // Volta do cadastro (?assinatura=teste) ou do Mercado Pago (?assinatura=ok): ativa o teste,
+  // preenche os dados profissionais com o cadastro e dá as boas-vindas. Sem servidor, a volta do
+  // Mercado Pago não é verificada aqui; a cobrança e o cancelamento valem pelo que está no Mercado Pago.
+  function aoIniciar() {
+    const c = lerConta(); if (!c) return;
+    const p = ctx.state.perfil;
+    if (!c.perfilAplicado) {
+      if (!p.nome || p.nome === ctx.state.professional) p.nome = c.nome;
+      if (!p.email) p.email = c.email;
+      if (!p.telefone && c.whatsapp) p.telefone = formatarTelefone(c.whatsapp);
+      if (!p.crn && c.crn) p.crn = c.crn;
+      c.perfilAplicado = true; salvarConta(c); ctx.save();
+    }
+    const q = new URLSearchParams(location.search), volta = q.get('assinatura');
+    if (!volta) return;
+    if (volta === 'ok' && c.status === 'aguardando-cartao') { c.status = 'teste'; c.cartaoEm = new Date().toISOString(); salvarConta(c); }
+    q.delete('assinatura');
+    history.replaceState(null, '', location.pathname + (q.size ? '?' + q : '') + location.hash);
+    ctx.render();
+    if (situacao(c) !== 'teste') return;
+    const nome = ctx.esc(c.nome.split(' ')[0]);
+    ctx.modal(`Boas-vindas, ${nome}!`, `<p>Seu teste grátis vai até <b>${dataBR(ultimoDiaTeste(c))}</b>. ${SITE.checkoutUrl ? `A primeira cobrança de ${moedaBR(SITE.preco)} será em ${dataBR(c.fimTeste)}, e você pode cancelar antes no Mercado Pago.` : 'Nada será cobrado sem você cadastrar o cartão.'}</p>
+<p>O sistema já vem com crianças de exemplo, todas fictícias, para você explorar: anamnese, plano alimentar, a escada do comer e a Área da Família.</p>
+<p>Seus dados profissionais (nome, e-mail, WhatsApp e CRN) já foram preenchidos em <b>Minha clínica</b>.</p>
+<div class="form-footer"><span>Dados salvos neste navegador</span><button class="button primary" data-action="close">Começar a explorar</button></div>`);
+  }
+
   // Cartões extras em "Minha clínica": dados profissionais (recibos, prescrições, prontuário)
   function cartoesConfiguracao() {
     const p = ctx.state.perfil, e = ctx.esc;
@@ -108,6 +166,9 @@ export function createModulos(ctx) {
     garantirEstado,
     tela: pagina => portal.tela(pagina),
     cartoesConfiguracao,
+    seloAssinatura,
+    cartaoAssinatura,
+    aoIniciar,
     evolucaoCard: pid => anamnese.evolucaoCard(pid),
     diarioFamilias: pid => portal.diarioFeed(pid),
     pendentesAviso: () => portal.pendentesAviso(),
@@ -120,6 +181,12 @@ export function createModulos(ctx) {
       portal.publicar(a.patient, { tipo: 'consulta', titulo: 'Consulta agendada', texto: `${a.type} · ${d} às ${a.time}` });
     },
     onClick(el) {
+      if (el.dataset.action === 'sair-master') {
+        const k = window.MASTIGO_ACESSO?.armazenamento;
+        try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch { /* sem armazenamento */ }
+        location.replace('./acesso.html?volta=sistema.html');
+        return true;
+      }
       if (el.dataset.action === 'perfil-remover-logo') { ctx.state.perfil.logo = ''; ctx.save(); ctx.render(); return true; }
       return modulos.some(m => m.onClick?.(el));
     },

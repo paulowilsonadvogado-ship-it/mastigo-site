@@ -4,20 +4,138 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#7b2ff7">
-  <!-- Endereço da Área da Família usado nos avisos por WhatsApp (vazio = endereço atual + #entrar) -->
-  <meta name="pipoca-portal" content="https://mastigô.com/#entrar">
-  <meta name="description" content="Mastigô: sistema para nutricionistas que acompanham crianças com seletividade alimentar — anamnese, plano alimentar, prescrição e área da família.">
-  <title>Mastigô · Cada descoberta conta</title>
+  <meta name="description" content="Mastigô: sistema para nutricionistas que atendem crianças com seletividade alimentar. Anamnese, plano alimentar com a TACO, prescrição em visual law e área da família. Teste 7 dias grátis.">
+  <title>Mastigô · Sistema para nutrição infantil e seletividade alimentar</title>
+  <script src="./acesso-guarda.js"></script>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./consultorio.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./entrada.css">
+  <script>
+    // Links antigos do sistema (ex.: mastigô.com/#entrar, enviado aos pais) continuam abrindo o sistema.
+    (function () {
+      var h = location.hash.slice(1), daPagina = ['', 'comecar', 'teste', 'duvidas', 'recursos', 'conteudo'];
+      if (daPagina.indexOf(h) < 0) location.replace('./sistema.html' + location.search + location.hash);
+    })();
+  </script>
 </head>
 <body>
-  <a class="skip" href="#main">Ir para o conteúdo</a>
-  <div id="app"></div>
-  <div id="toast" role="status" aria-live="polite"></div>
-  <dialog id="modal" aria-labelledby="modal-title"></dialog>
-  <script type="module" src="./app.js"></script>
+  <a class="pular" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="topo">
+    <a class="marca" href="./" aria-label="Mastigô — início"><img src="./mastigo-logo.svg" alt="Mastigô" width="152" height="40"></a>
+    <nav class="topo-links" aria-label="Acessos">
+      <a href="./sistema.html#entrar">Área da família</a>
+      <a href="./sistema.html">Entrar</a>
+      <a class="botao botao-roxo pequeno" href="#comecar">Testar 7 dias grátis</a>
+    </nav>
+  </header>
+
+  <main id="conteudo">
+    <section class="heroi" aria-labelledby="titulo">
+      <div class="heroi-texto">
+        <p class="sobrelinha">Para nutricionistas que atendem seletividade alimentar infantil</p>
+        <h1 id="titulo">Do “nem pensar” ao <span class="mastigo">mastigô!</span></h1>
+        <p class="lead">Anamnese, plano alimentar com a TACO, prescrição em visual law e uma área para os pais acompanharem a escada do comer. Um sistema feito para o consultório infantil, em português, do primeiro atendimento ao retorno.</p>
+        <div class="heroi-acoes">
+          <a class="botao botao-roxo" href="#comecar">Testar 7 dias grátis</a>
+          <a class="botao botao-linha" href="#teste">Como funciona o teste</a>
+        </div>
+        <p class="letra-miuda" id="miuda-heroi">Cartão de crédito necessário. Nada é cobrado nos 7 dias; depois, R$&nbsp;89,90 por mês. Cancele quando quiser.</p>
+      </div>
+
+      <figure class="escada-cartao" aria-label="Exemplo de escada do comer: o brócolis sobe do tolerar até o comer">
+        <figcaption><span class="tag">Escada do comer</span><strong>Brócolis · Theo, 4 anos</strong></figcaption>
+        <ol class="escada" id="escada">
+          <li><b>1</b>Tolerar</li><li><b>2</b>Interagir</li><li><b>3</b>Cheirar</li><li><b>4</b>Tocar</li><li><b>5</b>Provar</li><li><b>6</b>Comer</li>
+        </ol>
+        <div class="alimento-pula" id="alimento" aria-hidden="true"></div>
+        <div class="carimbo" id="carimbo" aria-hidden="true">mastigô!</div>
+        <p class="escada-legenda" id="escada-legenda" aria-live="polite">Hoje: tolerou no prato.</p>
+      </figure>
+    </section>
+
+    <section class="recursos" id="recursos" aria-labelledby="recursos-titulo">
+      <h2 id="recursos-titulo">O que você usa no dia a dia</h2>
+      <div class="recursos-grade">
+        <article><h3>Anamnese pediátrica</h3><p>Repertório alimentar, triagem picky eater × problem feeder e escores-z da OMS calculados na hora, com curvas de crescimento.</p></article>
+        <article><h3>Plano alimentar com a TACO</h3><p>597 alimentos da TACO e os seus próprios. Metas por idade (DRIs), adequação de nutrientes e substituições por equivalência.</p></article>
+        <article><h3>Prescrição em visual law</h3><p>Orientações que a família entende, ou no seu papel timbrado. Imprime em PDF e envia para a área da família.</p></article>
+        <article><h3>Escada do comer</h3><p>Alimentos-alvo do tolerar ao comer, com food chaining. Os pais marcam em casa o degrau que a criança alcançou.</p></article>
+        <article><h3>Área da família + WhatsApp</h3><p>Os pais entram com e-mail e PIN, veem metas, recados e o plano. Você avisa pelo WhatsApp com um toque.</p></article>
+        <article><h3>Financeiro do consultório</h3><p>Recebimentos, atendimentos a cobrar, recibo com valor por extenso, metas do mês e reserva de impostos.</p></article>
+      </div>
+    </section>
+
+    <section class="teste" id="teste" aria-labelledby="teste-titulo">
+      <div class="teste-cab">
+        <h2 id="teste-titulo">Como funciona o teste</h2>
+        <p>Você usa o sistema completo por 7 dias. Se não fizer sentido para o seu consultório, cancela antes do 8º dia e nada é cobrado.</p>
+      </div>
+      <ol class="linha-tempo">
+        <li><span class="quando">Hoje</span><strong>Cadastro e cartão</strong><p>O cartão é cadastrado no Mercado Pago. Nenhum valor é cobrado agora.</p></li>
+        <li><span class="quando">Dias 1 a 7</span><strong>Tudo liberado</strong><p>Pacientes, anamnese, plano, prescrição, área da família e financeiro, sem limite.</p></li>
+        <li><span class="quando">Até o 7º dia</span><strong>Cancele, se quiser</strong><p>Pelo Mercado Pago ou falando com a gente. Cancelando no teste, não há cobrança.</p></li>
+        <li class="cobranca"><span class="quando">8º dia</span><strong>Primeira mensalidade</strong><p>R$&nbsp;89,90 no cartão. Depois, todo mês no mesmo dia, até você cancelar.</p></li>
+      </ol>
+    </section>
+
+    <section class="comecar" id="comecar" aria-labelledby="comecar-titulo">
+      <div class="preco">
+        <p class="sobrelinha">Plano único</p>
+        <p class="valor"><span class="rs">R$</span><span id="preco-valor">89,90</span><span class="mes">/mês</span></p>
+        <p class="depois">depois de <b>7 dias grátis</b></p>
+        <ul>
+          <li>Todos os recursos, sem limite de pacientes</li>
+          <li>Área da família para os pais, sem custo extra</li>
+          <li>Sem fidelidade e sem multa para cancelar</li>
+        </ul>
+      </div>
+
+      <form class="cadastro" id="cadastro" novalidate>
+        <h2 id="comecar-titulo">Comece seu teste</h2>
+        <div class="campo"><label for="c-nome">Nome completo</label><input id="c-nome" name="nome" autocomplete="name" required maxlength="80"></div>
+        <div class="campo"><label for="c-email">E-mail</label><input id="c-email" name="email" type="email" autocomplete="email" required maxlength="120"></div>
+        <div class="campos-2">
+          <div class="campo"><label for="c-whats">WhatsApp</label><input id="c-whats" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="(48) 99999-0000" required maxlength="20"></div>
+          <div class="campo"><label for="c-crn">CRN <small>(opcional)</small></label><input id="c-crn" name="crn" placeholder="Ex.: CRN-10 12041" maxlength="20"></div>
+        </div>
+        <div class="condicoes" id="condicoes">
+          <strong>Condições da assinatura</strong>
+          <ul>
+            <li>Teste grátis de 7 dias, a partir de hoje (<span id="cond-hoje"></span>).</li>
+            <li>Se você não cancelar até <b id="cond-fim"></b>, a primeira mensalidade de R$&nbsp;89,90 é cobrada no cartão em <b id="cond-cobranca"></b>.</li>
+            <li>A assinatura renova sozinha todo mês, pelo mesmo valor, até você cancelar.</li>
+            <li>Cancelamento a qualquer momento, sem multa, pelo Mercado Pago (Assinaturas) ou pelos nossos canais de contato.</li>
+            <li>O cartão é cadastrado no ambiente seguro do Mercado Pago; o Mastigô não recebe nem guarda o número do cartão.</li>
+          </ul>
+        </div>
+        <label class="aceite"><input type="checkbox" name="aceite" id="c-aceite" required> <span>Li e concordo com as condições da assinatura acima.</span></label>
+        <p class="erro" id="erro" role="alert"></p>
+        <button class="botao botao-roxo largo" type="submit" id="c-enviar">Continuar</button>
+        <p class="letra-miuda" id="miuda-form"></p>
+      </form>
+    </section>
+
+    <section class="duvidas" id="duvidas" aria-labelledby="duvidas-titulo">
+      <h2 id="duvidas-titulo">Dúvidas comuns</h2>
+      <details><summary>Preciso informar o cartão para testar?</summary><p>Sim. O cartão fica cadastrado no Mercado Pago para que a assinatura continue sem interrupção depois do teste. Nada é cobrado durante os 7 dias.</p></details>
+      <details><summary>Quando acontece a primeira cobrança?</summary><p>No 8º dia depois do cadastro, no valor de R$ 89,90. As próximas acontecem todo mês, no mesmo dia.</p></details>
+      <details><summary>Como cancelo?</summary><p>No app ou no site do Mercado Pago, em Assinaturas, ou falando com a gente pelos canais de contato no fim desta página. Cancelando durante o teste, você não paga nada.</p></details>
+      <details><summary>Onde ficam os dados dos meus pacientes?</summary><p>Nesta fase, os dados ficam salvos no navegador do aparelho em que você usa o sistema. Use sempre o mesmo navegador e não apague os dados de navegação. A sincronização entre aparelhos está em implantação, com dados criptografados e acesso separado por clínica, conforme a LGPD.</p></details>
+      <details><summary>Os pais pagam alguma coisa?</summary><p>Não. A área da família faz parte da sua assinatura. Você libera o acesso de cada família pelo sistema.</p></details>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <img src="./mastigo-logo-branca.svg" alt="Mastigô" width="130" height="34">
+    <p class="slogan">Cada descoberta conta.</p>
+    <nav aria-label="Rodapé"><a href="./sistema.html">Entrar</a><a href="./sistema.html#entrar">Área da família</a><a href="#duvidas">Dúvidas</a></nav>
+    <p class="empresa" id="empresa"></p>
+  </footer>
+
+  <script type="module" src="./entrada.js"></script>
 </body>
 </html>

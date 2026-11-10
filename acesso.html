@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2a0a5e">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Mastigô · Acesso da equipe</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./entrada.css">
+  <script src="./acesso-guarda.js"></script>
+  <style>
+    body{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--leite)}
+    .bastidor{background:var(--noite);color:var(--lavanda);padding:48px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+    .bastidor::after{content:"";position:absolute;width:520px;height:520px;right:-220px;bottom:-240px;border-radius:50%;background:radial-gradient(circle,rgba(212,20,143,.45),rgba(123,47,247,0) 68%);pointer-events:none}
+    .bastidor img{width:170px;height:auto}
+    .bastidor .meio{margin:auto 0;max-width:30rem;position:relative;z-index:1}
+    .etiqueta{display:inline-block;font:600 13px/1 var(--texto);letter-spacing:.12em;text-transform:uppercase;color:var(--amarelo);border:1.5px solid rgba(255,196,0,.45);border-radius:999px;padding:8px 14px;margin-bottom:22px}
+    .bastidor h1{color:var(--branco);font-size:clamp(34px,4.2vw,52px);line-height:1.08;margin-bottom:18px}
+    .bastidor h1 em{font-style:normal;color:var(--rosa);white-space:nowrap}
+    .cartao-acesso .erro{margin-bottom:6px}
+    .bastidor p{font-size:17px;color:#d9ccf5;max-width:26rem}
+    .fila{display:flex;gap:14px;align-items:flex-end;margin-top:34px;position:relative;z-index:1}
+    .fila span{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.08);display:grid;place-items:center}
+    .fila svg{width:38px;height:38px}
+    .fila span:nth-child(2){transform:translateY(-6px)}.fila span:nth-child(4){transform:translateY(-4px)}
+    .bastidor small{position:relative;z-index:1;color:#a998cc;font-size:13px}
+    .porta{display:flex;align-items:center;justify-content:center;padding:40px 24px}
+    .cartao-acesso{width:100%;max-width:400px}
+    .cartao-acesso h2{font-size:28px;margin-bottom:6px}
+    .cartao-acesso>p{color:var(--suave);margin:0 0 26px}
+    .senha{position:relative}
+    .senha input{width:100%;padding-right:86px}
+    .ver{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;font:600 14px var(--texto);color:var(--roxo);padding:8px 10px;cursor:pointer;border-radius:10px}
+    .lembrar{display:flex;gap:10px;align-items:center;font-size:15px;margin:4px 0 14px;cursor:pointer}
+    .lembrar input{width:20px;height:20px;accent-color:var(--roxo)}
+    .rodape-acesso{margin-top:22px;font-size:14px;color:var(--suave)}
+    @media(max-width:860px){
+      body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+      .bastidor{padding:28px 24px 30px}
+      .bastidor img{width:132px}
+      .bastidor .meio{margin:26px 0 0}
+      .bastidor h1{font-size:32px}
+      .bastidor p{font-size:16px}
+      .fila{margin-top:22px}.fila span{width:44px;height:44px;border-radius:13px}.fila svg{width:30px;height:30px}
+      .bastidor small{display:none}
+      .porta{align-items:flex-start;padding:30px 22px 40px}
+    }
+  </style>
+</head>
+<body>
+  <section class="bastidor" aria-labelledby="titulo">
+    <img src="./mastigo-logo-branca.svg" alt="Mastigô" width="170" height="45">
+    <div class="meio">
+      <span class="etiqueta">Pré-lançamento</span>
+      <h1 id="titulo">Estamos arrumando <em>a mesa.</em></h1>
+      <p>O Mastigô está nos últimos ajustes. Por enquanto, o acesso é só da equipe.</p>
+      <div class="fila" id="fila" aria-hidden="true"></div>
+    </div>
+    <small>Cada descoberta conta.</small>
+  </section>
+
+  <main class="porta">
+    <form class="cartao-acesso" id="acesso" novalidate>
+      <h2>Acesso da equipe</h2>
+      <p>Entre com o usuário e a senha do acesso master.</p>
+      <div class="campo"><label for="a-usuario">Usuário</label><input id="a-usuario" name="usuario" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required maxlength="80"></div>
+      <div class="campo"><label for="a-senha">Senha</label><div class="senha"><input id="a-senha" name="senha" type="password" autocomplete="current-password" required maxlength="120"><button type="button" class="ver" id="ver-senha" aria-controls="a-senha" aria-pressed="false">Mostrar</button></div></div>
+      <label class="lembrar"><input type="checkbox" name="manter" checked> Manter conectado neste aparelho</label>
+      <p class="erro" id="erro" role="alert"></p>
+      <button class="botao botao-roxo largo" id="entrar" type="submit">Entrar</button>
+      <p class="rodape-acesso">Em computador compartilhado, desmarque “Manter conectado”. Para sair depois, use <b>Minha clínica › Sair do acesso master</b>.</p>
+    </form>
+  </main>
+  <script type="module" src="./acesso.js"></script>
+</body>
+</html>
