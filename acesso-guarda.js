@@ -8,7 +8,7 @@
 // estático o código é público; segurança de verdade (login de cada nutricionista) vem com o servidor.
 (function () {
   var A = window.MASTIGO_ACESSO = {
-    ativo: true,
+    ativo: false,
     chave: 'd7e7ab110fcd120db44f443c024b19bdad6d539b65a4f182f262e8f5387bb333',
     armazenamento: 'mastigo-acesso',
     minutosSemUso: 30
