@@ -1,11 +1,11 @@
 // Plano alimentar calculado com a TACO (estilo WebDiet/Dietbox/Nutrium), com lista de substituições
 // por equivalência energética (método de equivalentes, como nas listas de trocas dos EUA e o
 // "método de troca de alimentos" chinês) e trilha de alimentos-ponte (food chaining) para seletividade.
-import { tacoDados, tacoCategorias, tacoCampos, tacoFonte } from './taco.js?v=90a3970';
-import { foods, icoAlimento } from './data.js?v=90a3970';
-import { uid, num, dataBR } from './util-nutri.js?v=90a3970';
-import { detectarAlergenicos } from './alergenicos.js?v=90a3970';
-import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=90a3970';
+import { tacoDados, tacoCategorias, tacoCampos, tacoFonte } from './taco.js?v=6c90e3e';
+import { foods, icoAlimento } from './data.js?v=6c90e3e';
+import { uid, num, dataBR } from './util-nutri.js?v=6c90e3e';
+import { detectarAlergenicos } from './alergenicos.js?v=6c90e3e';
+import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=6c90e3e';
 
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const CAMPOS = tacoCampos; // kcal, ptn, lip, cho, fibra, ca, fe, zn, na, k, vitA, vitC, mg

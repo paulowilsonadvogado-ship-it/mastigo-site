@@ -2,7 +2,7 @@
 // extras), cor, sabor e textura. Reconhece o texto livre que a família escreve ("Frango empanado",
 // "Banana prata", "Biscoito de polvilho") e liga ao catálogo quando dá. A nutricionista pode corrigir
 // qualquer classificação na tela; o que ela corrige vale só para aquela criança.
-import { texturas as TEXTURAS_ANAMNESE } from './anamnese.js?v=90a3970';
+import { texturas as TEXTURAS_ANAMNESE } from './anamnese.js?v=6c90e3e';
 
 export const GRUPOS = {
   energeticos: { nome: 'Energéticos', dica: 'cereais, pães, massas e tubérculos' },

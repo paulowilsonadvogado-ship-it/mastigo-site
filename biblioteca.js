@@ -1,8 +1,8 @@
 // Biblioteca de alimentos única: catálogo do diário (desenhado no app.js), Tabela TACO e alimentos próprios.
 // Antes a TACO só aparecia dentro do plano e os alimentos próprios num modal do plano — agora fica tudo aqui.
-import { baseTaco } from './plano.js?v=90a3970';
-import { tacoCategorias, tacoCampos, tacoFonte } from './taco.js?v=90a3970';
-import { uid, num } from './util-nutri.js?v=90a3970';
+import { baseTaco } from './plano.js?v=6c90e3e';
+import { tacoCategorias, tacoCampos, tacoFonte } from './taco.js?v=6c90e3e';
+import { uid, num } from './util-nutri.js?v=6c90e3e';
 
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const COLUNAS = [['kcal', 'kcal', 0], ['ptn', 'Prot. (g)', 1], ['cho', 'Carb. (g)', 1], ['lip', 'Lip. (g)', 1], ['fibra', 'Fibra (g)', 1], ['ca', 'Cálcio (mg)', 0], ['fe', 'Ferro (mg)', 1], ['na', 'Sódio (mg)', 0]];

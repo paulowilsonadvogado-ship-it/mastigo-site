@@ -472,3 +472,33 @@ button.badge{cursor:pointer;font-family:inherit}
 .vd-nota{margin-top:14px;font-size:12px;line-height:1.55;background:#fff6dc;border:1px solid #ffe08a;border-radius:12px;padding:11px 13px;color:#5d4a12}
 .vd-nota b{display:block;margin-bottom:2px}
 @media(max-width:900px){.vendas{grid-template-columns:1fr}}
+/* Vendas: relatório geral */
+.vd-rel{padding:24px;margin-bottom:20px}
+.vd-rel-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.vd-rel-cab h2{font-size:18px}
+.vd-rel-cab p{font-size:12px;color:var(--muted);margin-top:4px}
+.vd-acoes{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vd-nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.vd-num{border:1px solid #ece3ff;border-top:4px solid var(--cor);border-radius:14px;padding:14px 15px;background:#fff}
+.vd-num span{display:block;font-size:11.5px;color:#5d4f78;font-weight:600}
+.vd-num b{display:block;font-size:26px;color:#26324a;margin:6px 0 2px;line-height:1.1}
+.vd-num small{display:block;font-size:11px;color:var(--muted);line-height:1.4}
+.vd-tabela-rolagem{overflow-x:auto;border:1px solid #ece3ff;border-radius:14px}
+.vd-tabela{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
+.vd-tabela th{text-align:left;font-size:11px;color:#5d4f78;background:#faf7ff;padding:10px 12px;border-bottom:1px solid #ece3ff}
+.vd-tabela td{padding:10px 12px;border-bottom:1px solid #f4effc;color:#26324a}
+.vd-tabela tr:last-child td{border-bottom:0}
+.vd-sit{display:inline-block;font-size:11px;font-weight:700;color:var(--cor);background:color-mix(in srgb,var(--cor) 11%,#fff);border-radius:20px;padding:3px 9px;white-space:nowrap}
+.vd-carregando{font-size:13px;color:var(--muted)}
+.vd-erro{background:#fff0f3;border:1px solid #ffc6d3;color:#9b0f3e;border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:12px}
+.vd-conectar{padding:24px;margin-bottom:20px;max-width:760px}
+.vd-conectar h2{font-size:18px;margin-bottom:6px}
+.vd-conectar>p,.vd-conectar ol{font-size:13px;color:#4a5568;line-height:1.7}
+.vd-conectar ol{padding-left:20px;margin:8px 0 16px}
+.vd-conectar a{color:#5b16d0;font-weight:600}
+.vd-token{display:grid;gap:10px;max-width:520px}
+.vd-token label:first-child{font-size:12px;font-weight:600;color:#3c2b63}
+.vd-token input[type=password]{border:1px solid #e4d9fb;border-radius:10px;padding:11px 12px;font-size:13px}
+.vd-token .button{justify-self:start}
+@media(max-width:1100px){.vd-nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.vd-nums{grid-template-columns:1fr 1fr}.vd-num b{font-size:21px}}

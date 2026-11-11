@@ -1,5 +1,5 @@
-import { foods, foodGroups, stages, initialState, summarize, normalize, today,icoAlimento} from './data.js?v=90a3970';
-import { createModulos, paginasConsultorio, paginasOcultas } from './modulos.js?v=90a3970';
+import { foods, foodGroups, stages, initialState, summarize, normalize, today,icoAlimento} from './data.js?v=6c90e3e';
+import { createModulos, paginasConsultorio, paginasOcultas } from './modulos.js?v=6c90e3e';
 const $ = s => document.querySelector(s);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons = {
