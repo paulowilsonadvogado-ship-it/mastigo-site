@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#2a0a5e">
   <meta name="robots" content="noindex, nofollow">
-  <title>Mastigô · Acesso master</title>
+  <title>Mastigô · Entrar</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./entrada.css?v=8bab5f8">
-  <script src="./acesso-guarda.js?v=8bab5f8"></script>
+  <link rel="stylesheet" href="./entrada.css?v=90a3970">
+  <script src="./acesso-guarda.js?v=90a3970"></script>
   <style>
     body{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--leite)}
     .bastidor{background:var(--noite);color:var(--lavanda);padding:48px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden}
@@ -32,11 +32,17 @@
     .porta{display:flex;align-items:center;justify-content:center;padding:40px 24px}
     .cartao-acesso{width:100%;max-width:400px}
     .cartao-acesso h2{font-size:28px;margin-bottom:6px}
-    .cartao-acesso>p{color:var(--suave);margin:0 0 26px}
+    #acesso>p:first-of-type{color:var(--suave);margin:0 0 26px}
+    .cadastro-link{text-align:center}
     .senha{position:relative}
     .senha input{width:100%;padding-right:86px}
     .ver{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;font:600 14px var(--texto);color:var(--roxo);padding:8px 10px;cursor:pointer;border-radius:10px}
     .rodape-acesso{margin-top:22px;font-size:14px;color:var(--suave)}
+    .rodape-acesso a{color:var(--roxo);font-weight:600}
+    .clientes{background:var(--lavanda);border:1.5px solid var(--linha);border-radius:16px;padding:16px 18px;margin-bottom:28px}
+    .clientes b{display:block;font-family:var(--display);font-size:18px;color:var(--noite);margin-bottom:4px}
+    .clientes p{font-size:14.5px;color:var(--tinta);margin:0 0 12px}
+    .clientes .botao{width:100%}
     @media(max-width:860px){
       body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
       .bastidor{padding:28px 24px 30px}
@@ -54,26 +60,29 @@
   <section class="bastidor" aria-labelledby="titulo">
     <img src="./mastigo-logo-branca.svg" alt="Mastigô" width="170" height="45">
     <div class="meio">
-      <span class="etiqueta">Equipe Mastigô</span>
-      <h1 id="titulo">Entrada da <em>equipe.</em></h1>
-      <p>Esta entrada é do acesso master. Nutricionista que quer usar o Mastigô começa pelo <a href="./index.html#comecar" style="color:#ffc400;font-weight:600">teste grátis de 7 dias</a>.</p>
+      <span class="etiqueta">Entrar</span>
+      <h1 id="titulo">Bom te ver <em>de volta.</em></h1>
+      <p>O sistema abre para quem já fez o cadastro completo: dados na página de entrada e cartão no Mercado Pago. Ainda não fez? Comece pelo <a href="./index.html#comecar" style="color:#ffc400;font-weight:600">teste grátis de 7 dias</a>.</p>
       <div class="fila" id="fila" aria-hidden="true"></div>
     </div>
     <small>Cada descoberta conta.</small>
   </section>
 
   <main class="porta">
-    <form class="cartao-acesso" id="acesso" novalidate>
-      <h2>Acesso master</h2>
-      <p>Entre com o usuário e a senha do acesso master.</p>
+    <div class="cartao-acesso">
+    <div class="clientes" id="clientes" hidden></div>
+    <form id="acesso" novalidate>
+      <h2>Entrar</h2>
+      <p>Login da dona do site.</p>
       <div class="campo"><label for="a-usuario">Usuário</label><input id="a-usuario" name="usuario" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required maxlength="80"></div>
       <div class="campo"><label for="a-senha">Senha</label><div class="senha"><input id="a-senha" name="senha" type="password" autocomplete="current-password" required maxlength="120"><button type="button" class="ver" id="ver-senha" aria-controls="a-senha" aria-pressed="false">Mostrar</button></div></div>
       <p class="erro" id="erro" role="alert"></p>
       <button class="botao botao-roxo largo" id="entrar" type="submit">Entrar</button>
-      <p class="rodape-acesso">A senha é pedida a cada entrada: em cada aba nova e sempre que o site ficar 30 minutos sem uso. Para sair antes, use <b>Minha clínica › Sair do acesso master</b>.</p>
-      <p class="rodape-acesso">Fez o cadastro e quer entrar? Use o <a href="./index.html">Entrar do topo da página inicial</a>.</p>
+      <p class="rodape-acesso">A senha é pedida a cada entrada: em cada aba nova e sempre que o site ficar 30 minutos sem uso.</p>
     </form>
+    <p class="rodape-acesso cadastro-link" id="cadastro-link">Ainda não é cliente? <a href="./index.html#comecar">Faça o cadastro e use 7 dias grátis</a>.</p>
+    </div>
   </main>
-  <script type="module" src="./acesso.js?v=8bab5f8"></script>
+  <script type="module" src="./acesso.js?v=90a3970"></script>
 </body>
 </html>

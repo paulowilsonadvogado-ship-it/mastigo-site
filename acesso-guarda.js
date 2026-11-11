@@ -1,8 +1,8 @@
 // Quem pode abrir o sistema (sistema.html). A página de entrada (index.html) é pública.
-// - A equipe (Tainara), pelo "Entrar" do rodapé: acesso master em acesso.html. A senha é pedida a cada
+// - A dona do site (Tainara), pelo "Entrar": login master em acesso.html. A senha é pedida a cada
 //   entrada; o acesso vale só para a aba (sessionStorage) e cai depois de 30 minutos sem uso.
 // - Quem fez o cadastro na página de entrada E cadastrou o cartão no Mercado Pago (conta "mastigo-conta"
-//   neste navegador, já de volta do Mercado Pago). Sem isso, o "Entrar" do topo leva ao cadastro.
+//   neste navegador, já de volta do Mercado Pago). Sem isso, a tela Entrar manda para o cadastro.
 // - Os pais, pela Área da Família (sistema.html#entrar).
 // Para trocar usuário/senha master, rode node scripts/chave-acesso.mjs e cole a chave abaixo; usuário e
 // senha não ficam escritos em lugar nenhum. modo 'tudo' fecha o site inteiro (pré-lançamento).
@@ -42,8 +42,8 @@
     if (A.valido()) { A.entrar(); return true; }
     if (A.modo !== 'tudo' && (A.assinante() || familia())) return true;
     var volta = encodeURIComponent((location.pathname.split('/').pop() || 'index.html') + location.search + location.hash);
-    // Sistema fechado: assinantes vão para o cadastro; a equipe entra pelo rodapé (acesso.html)
-    location.replace(A.modo === 'tudo' ? './acesso.html?volta=' + volta : './index.html?entrar=1#comecar');
+    // Sem permissão: vai para a tela Entrar (login da dona do site, atalho de quem já é cliente, link do cadastro)
+    location.replace('./acesso.html?volta=' + volta);
     return false;
   }
   try { localStorage.removeItem(A.armazenamento); } catch (e) { /* acessos lembrados de versões antigas não valem */ }

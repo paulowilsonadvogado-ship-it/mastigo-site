@@ -1,16 +1,16 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js?v=8bab5f8';
-import { createAnamnese } from './anamnese.js?v=8bab5f8';
-import { createPlano } from './plano.js?v=8bab5f8';
-import { createPrescricao } from './prescricao.js?v=8bab5f8';
-import { createPortal } from './portal.js?v=8bab5f8';
-import { createBiblioteca } from './biblioteca.js?v=8bab5f8';
-import { createTrilha, trilhaDemo } from './trilha.js?v=8bab5f8';
-import { createVendas } from './vendas.js?v=8bab5f8';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=8bab5f8';
-import { SITE } from './config-site.js?v=8bab5f8';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js?v=8bab5f8';
-import { formatarTelefone } from './whatsapp.js?v=8bab5f8';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=90a3970';
+import { createAnamnese } from './anamnese.js?v=90a3970';
+import { createPlano } from './plano.js?v=90a3970';
+import { createPrescricao } from './prescricao.js?v=90a3970';
+import { createPortal } from './portal.js?v=90a3970';
+import { createBiblioteca } from './biblioteca.js?v=90a3970';
+import { createTrilha, trilhaDemo } from './trilha.js?v=90a3970';
+import { createVendas } from './vendas.js?v=90a3970';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=90a3970';
+import { SITE } from './config-site.js?v=90a3970';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js?v=90a3970';
+import { formatarTelefone } from './whatsapp.js?v=90a3970';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -100,7 +100,7 @@ export function createModulos(ctx) {
   // Pré-lançamento: quem entrou com o acesso master pode sair por aqui (ver acesso-guarda.js)
   function cartaoAcessoMaster() {
     if (!window.MASTIGO_ACESSO?.ativo || !window.MASTIGO_ACESSO.valido?.()) return '';
-    return `<section class="card"><h2>Acesso master</h2><p>Você entrou pelo acesso master (o Entrar do rodapé da página inicial). A senha é pedida a cada entrada: em cada aba nova e depois de 30 minutos sem uso.</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
+    return `<section class="card"><h2>Acesso master</h2><p>Você entrou com o login da dona do site. A senha é pedida a cada entrada: em cada aba nova e depois de 30 minutos sem uso.</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
   }
   const cartaoAssinatura = () => cartaoPlano() + cartaoAcessoMaster();
   // Volta do cadastro (?assinatura=teste) ou do Mercado Pago (?assinatura=ok): ativa o teste,

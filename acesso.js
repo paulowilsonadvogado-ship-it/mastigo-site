@@ -1,6 +1,7 @@
 // Tela do acesso master do pré-lançamento (ver acesso-guarda.js).
-import { derivarChave } from './acesso-chave.js?v=8bab5f8';
-import { iconeAlimento } from './alimentos-icones.js?v=8bab5f8';
+import { derivarChave } from './acesso-chave.js?v=90a3970';
+import { iconeAlimento } from './alimentos-icones.js?v=90a3970';
+import { SITE } from './config-site.js?v=90a3970';
 
 const $ = s => document.querySelector(s);
 const A = window.MASTIGO_ACESSO || { ativo: false };
@@ -11,6 +12,19 @@ function destino() {
   return /^(index|sistema)\.html(?:[?#].*)?$/.test(v) ? './' + v : './index.html';
 }
 if (!A.ativo || A.valido()) location.replace(destino());
+
+// Cliente que já fez o cadastro neste aparelho: atalho para o sistema (ou para terminar o cartão)
+let conta = null;
+try { conta = JSON.parse(localStorage.getItem('mastigo-conta') || 'null'); } catch { /* sem armazenamento */ }
+if (conta) {
+  const box = $('#clientes'), nome = String(conta.nome || '').split(' ')[0];
+  const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  box.innerHTML = conta.status === 'aguardando-cartao' && SITE.checkoutUrl
+    ? `<b>Falta só o cartão${nome ? `, ${esc(nome)}` : ''}.</b><p>Seu cadastro está feito. Para entrar, conclua a assinatura no Mercado Pago (os ${SITE.diasTeste} primeiros dias são grátis).</p><a class="botao botao-roxo" href="${esc(SITE.checkoutUrl)}">Cadastrar o cartão</a>`
+    : `<b>Olá${nome ? `, ${esc(nome)}` : ''}!</b><p>Seu cadastro está completo neste aparelho.</p><a class="botao botao-roxo" href="./sistema.html">Abrir o sistema</a>`;
+  box.hidden = false;
+  $('#cadastro-link').hidden = true;
+}
 
 $('#fila').innerHTML = ['brocolis', 'morango', 'cenoura', 'banana', 'ovo'].map(id => `<span>${iconeAlimento(id)}</span>`).join('');
 
