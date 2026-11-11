@@ -1,16 +1,16 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js';
-import { createAnamnese } from './anamnese.js';
-import { createPlano } from './plano.js';
-import { createPrescricao } from './prescricao.js';
-import { createPortal } from './portal.js';
-import { createBiblioteca } from './biblioteca.js';
-import { createTrilha, trilhaDemo } from './trilha.js';
-import { createVendas } from './vendas.js';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js';
-import { SITE } from './config-site.js';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js';
-import { formatarTelefone } from './whatsapp.js';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=8bab5f8';
+import { createAnamnese } from './anamnese.js?v=8bab5f8';
+import { createPlano } from './plano.js?v=8bab5f8';
+import { createPrescricao } from './prescricao.js?v=8bab5f8';
+import { createPortal } from './portal.js?v=8bab5f8';
+import { createBiblioteca } from './biblioteca.js?v=8bab5f8';
+import { createTrilha, trilhaDemo } from './trilha.js?v=8bab5f8';
+import { createVendas } from './vendas.js?v=8bab5f8';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=8bab5f8';
+import { SITE } from './config-site.js?v=8bab5f8';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js?v=8bab5f8';
+import { formatarTelefone } from './whatsapp.js?v=8bab5f8';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -67,17 +67,6 @@ export function createModulos(ctx) {
     if (!s.trilhas) { s.trilhas = {}; if (s.patients.some(p => p.id === 'p1')) s.trilhas.p1 = trilhaDemo(); }
     if (!s.alimentosProprios) s.alimentosProprios = [];
     if (!s.acessos) s.acessos = {};
-    if (!s.acessos.p1 && !s.acessoDemoCriado) {
-      s.acessoDemoCriado = true;
-      // Acesso de demonstração (fictício) para testar a área dos pais: familia@demo.com / PIN 123456
-      if (s.patients.some(p => p.id === 'p1')) s.acessos.p1 = { nome: 'Marina', email: 'familia@demo.com', sal: 'demo-pipoca', pinHash: '5959ade8fbacf4ce043a6bad44edb2323bea4e9ea4faad9027d83ed383c8bf40', ativo: true, demo: true, criadoEm: new Date().toISOString(), compartilhar: { plano: true, escada: true, diario: true, questionario: true, consultas: true } };
-      if (s.acessos.p1) {
-        s.atualizacoes = s.atualizacoes || [];
-        s.atualizacoes.push({ id: uid(), paciente: 'p1', tipo: 'recado', titulo: 'Boas-vindas à Área da Família!', texto: 'Aqui vocês acompanham as orientações, as metas da semana e as conquistas do Theo. Respondam o questionário pré-consulta e registrem as descobertas no diário — pode mandar foto do prato!', criadoEm: new Date().toISOString(), lidoEm: '' });
-        s.metas = s.metas || {};
-        if (!s.metas.p1) s.metas.p1 = { itens: [{ id: uid(), texto: 'Refeição à mesa, sem telas' }, { id: uid(), texto: 'Brócolis no pratinho separado, sem insistir' }, { id: uid(), texto: 'Água entre as refeições' }], marcacoes: {} };
-      }
-    }
     if (!s.atualizacoes) s.atualizacoes = [];
     if (!s.modelosPlano) s.modelosPlano = [];
     if (!s.whatsapp) s.whatsapp = { perguntar: true, modo: 'manual' };

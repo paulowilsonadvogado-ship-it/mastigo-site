@@ -1,8 +1,8 @@
 // Vendas do Mastigô: tela só do acesso master (Tainara). As assinaturas, cobranças e cancelamentos
 // ficam no Mercado Pago dela; daqui ela vai direto para lá. Contar as vendas aqui dentro depende do
 // servidor receber os avisos do Mercado Pago (webhook) — próximo passo técnico.
-import { SITE } from './config-site.js';
-import { moedaBR } from './assinatura.js';
+import { SITE } from './config-site.js?v=8bab5f8';
+import { moedaBR } from './assinatura.js?v=8bab5f8';
 
 const MP = {
   assinantes: 'https://www.mercadopago.com.br/subscription-plans/plans',

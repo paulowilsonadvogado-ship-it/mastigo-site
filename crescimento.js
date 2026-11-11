@@ -3,7 +3,7 @@
 // valores além de ±3 usam o ajuste recomendado pela OMS (distância entre −3/−2 ou +2/+3 DP).
 // 0–5 anos (até 1.826 dias): WHO Child Growth Standards 2006. 5–19 anos: WHO Reference 2007
 // (peso/idade só até 10 anos). Comprimento deitado até 2 anos; estatura em pé a partir de 2 anos.
-import { whoLMS } from './who-lms.js';
+import { whoLMS } from './who-lms.js?v=8bab5f8';
 
 const DIA_MES = 30.4375;
 
