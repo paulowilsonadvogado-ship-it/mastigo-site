@@ -6,8 +6,6 @@ export const categoriasDespesa = ['Aluguel / sala', 'Software e assinaturas', 'M
 export const formasPagamento = ['PIX', 'Cartão de crédito', 'Cartão de débito', 'Dinheiro', 'Boleto', 'Transferência', 'Convênio'];
 
 export function financeiroInicial() {
-  const hoje = new Date().toLocaleDateString('sv-SE');
-  const ha = n => somaMeses(hoje, -n);
   return {
     servicos: [
       { id: 's1', nome: 'Primeira consulta (avaliação de seletividade)', valor: 350, duracao: 90 },
@@ -17,17 +15,7 @@ export function financeiroInicial() {
       { id: 's5', nome: 'Consulta de suplementação', valor: 250, duracao: 60 }
     ],
     config: { reservaImpostos: 6, metaMensal: 8000 },
-    lancamentos: [
-      { id: 'f1', tipo: 'receita', descricao: 'Primeira consulta', categoria: 'Avaliação de seletividade', valor: 350, vencimento: hoje, pagoEm: hoje, forma: 'PIX', paciente: 'p1', obs: '' },
-      { id: 'f2', tipo: 'receita', descricao: 'Pacote mensal (4 sessões)', categoria: 'Pacote de acompanhamento', valor: 640, vencimento: hoje, pagoEm: '', forma: 'Cartão de crédito', paciente: 'p2', obs: '' },
-      { id: 'f3', tipo: 'receita', descricao: 'Retorno', categoria: 'Retorno', valor: 220, vencimento: ha(1), pagoEm: '', forma: 'PIX', paciente: 'p3', obs: 'Lembrar a família' },
-      { id: 'f4', tipo: 'despesa', descricao: 'Aluguel da sala', categoria: 'Aluguel / sala', valor: 900, vencimento: hoje, pagoEm: hoje, forma: 'Boleto', paciente: '', obs: '' },
-      { id: 'f5', tipo: 'despesa', descricao: 'Software do consultório', categoria: 'Software e assinaturas', valor: 89.9, vencimento: hoje, pagoEm: '', forma: 'Cartão de crédito', paciente: '', obs: '' },
-      { id: 'f6', tipo: 'receita', descricao: 'Sessão de terapia alimentar', categoria: 'Terapia alimentar (sessão)', valor: 180, vencimento: ha(1), pagoEm: ha(1), forma: 'Dinheiro', paciente: 'p4', obs: '' },
-      { id: 'f7', tipo: 'receita', descricao: 'Pacote mensal (4 sessões)', categoria: 'Pacote de acompanhamento', valor: 640, vencimento: ha(2), pagoEm: ha(2), forma: 'PIX', paciente: 'p1', obs: '' },
-      { id: 'f8', tipo: 'despesa', descricao: 'Aluguel da sala', categoria: 'Aluguel / sala', valor: 900, vencimento: ha(1), pagoEm: ha(1), forma: 'Boleto', paciente: '', obs: '' },
-      { id: 'f9', tipo: 'despesa', descricao: 'Anúncios Instagram', categoria: 'Marketing e anúncios', valor: 150, vencimento: ha(1), pagoEm: ha(1), forma: 'Cartão de crédito', paciente: '', obs: '' }
-    ],
+    lancamentos: [],
     proximoRecibo: 1
   };
 }

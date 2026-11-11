@@ -165,3 +165,7 @@ p{margin:0}
   html{scroll-behavior:auto}
   *{transition:none!important;animation:none!important}
 }
+/* Aviso para quem tentou entrar sem ter assinado */
+.aviso-entrar{background:#fff6dc;border:1.5px solid #ffd76a;border-radius:14px;padding:13px 15px;font-size:15px;line-height:1.5;color:var(--noite);margin-bottom:18px}
+.aviso-entrar b{display:block;margin-bottom:2px}
+.aviso-entrar a{color:var(--roxo);font-weight:700;margin-left:4px}

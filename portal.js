@@ -99,7 +99,7 @@ export function createPortal(ctx, plano) {
 <form id="fam-login-form" autocomplete="on"><div class="field"><label for="fam-email">E-mail do responsável</label><input id="fam-email" name="email" type="email" autocomplete="username" required placeholder="seuemail@exemplo.com"></div>
 <div class="field"><label for="fam-pin">PIN de acesso (6 números)</label><input id="fam-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="current-password" required placeholder="••••••"></div>
 <p id="fam-erro" class="error" role="alert"></p><button class="button primary fam-entrar" type="submit">${icon('lock')}Entrar</button></form>
-<p class="fam-ajuda">Não tem PIN ou esqueceu? Peça um novo à nutricionista.</p>${Object.values(acessos()).some(x => x.demo && x.ativo) ? '<div class="fam-demo"><b>Para testar:</b> e-mail <code>familia@demo.com</code> · PIN <code>123456</code><button type="button" class="button small" data-action="fam-preencher-demo">Preencher</button></div>' : ''}
+<p class="fam-ajuda">O e-mail e o PIN de acesso são criados pela nutricionista no sistema e enviados a vocês. Não tem PIN ou esqueceu? Peça um novo a ela.</p>
 <button class="text-button fam-voltar" data-action="fam-voltar-prof">${icon('arrow')}Sou profissional: voltar ao painel</button></div>
 <p class="fam-aviso">Ambiente demonstrativo: o acesso fica salvo neste navegador. Use somente dados fictícios.</p></div>`;
   }
@@ -275,7 +275,6 @@ ${ac ? `<label class="check"><input type="checkbox" name="ativo" ${ac.ativo ? 'c
       const d = el.dataset, s = sessao();
       if (d.action === 'family' || d.action === 'fam-abrir-login') { ctx.navigate('entrar'); return true; }
       if (d.action === 'fam-voltar-prof') { ctx.navigate('overview'); return true; }
-      if (d.action === 'fam-preencher-demo') { const e = document.getElementById('fam-email'), p = document.getElementById('fam-pin'); if (e && p) { e.value = 'familia@demo.com'; p.value = '123456'; } return true; }
       if (d.action === 'fam-sair') { setSessao(null); ctx.navigate('entrar'); toast('Você saiu da área da família.'); return true; }
       if (d.famAba) { aba = d.famAba; ctx.render(); return true; }
       if (s && d.famLida) { const u = atualizacoes().find(x => x.id === d.famLida && x.paciente === s.paciente); if (u && !u.lidoEm) { u.lidoEm = new Date().toISOString(); ctx.save(); } if (!d.famDoc) { ctx.render(); return true; } }

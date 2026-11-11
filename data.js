@@ -20,11 +20,16 @@ export const foodGroups = groups.map(g=>g[0]);
 // Ilustração do alimento (SVG próprio; não depende de emoji, que varia entre Windows, iPhone e Android)
 export const icoAlimento = f => iconeAlimento(f?.id);
 export const today = () => new Date().toLocaleDateString('sv-SE');
+// Estado de quem começa a usar: sem nenhuma criança, registro ou encontro (a pedido do responsável,
+// 11/11/2026). Os exemplos fictícios continuam em exemplosDemonstracao(), só para testes.
 export function initialState() {
+ return { version: 2, patients: [], entries: [], appointments: [], clinic: '', professional: '', specialty: 'Nutricionista' };
+}
+export function exemplosDemonstracao() {
  const day = today();
  const past = n => { const d=new Date(); d.setDate(d.getDate()-n); return d.toLocaleDateString('sv-SE'); };
  return {
-  version: 1,
+  version: 2,
   patients: [
    {id:'p1',name:'Theo Martins',age:'4 anos',guardian:'Marina',color:'mint',initials:'TM',focus:'Explorar novas texturas'},
    {id:'p2',name:'Laura Costa',age:'6 anos',guardian:'Rafael',color:'peach',initials:'LC',focus:'Conhecer frutas diferentes'},

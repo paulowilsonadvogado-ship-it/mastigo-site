@@ -6,6 +6,7 @@ import { createPrescricao } from './prescricao.js';
 import { createPortal } from './portal.js';
 import { createBiblioteca } from './biblioteca.js';
 import { createTrilha, trilhaDemo } from './trilha.js';
+import { createVendas } from './vendas.js';
 import { perfilPadrao, lerImagem, uid } from './util-nutri.js';
 import { SITE } from './config-site.js';
 import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js';
@@ -19,7 +20,8 @@ export const paginasConsultorio = {
   plano: ['Plano alimentar', 'plate'],
   prescricao: ['Prescrição', 'pen'],
   familias: ['Portal da família', 'heart'],
-  financeiro: ['Financeiro', 'money']
+  financeiro: ['Financeiro', 'money'],
+  vendas: ['Vendas do Mastigô', 'chart']
 };
 
 // Exemplo fictício para a demonstração (criança p1)
@@ -48,11 +50,11 @@ export function createModulos(ctx) {
   // Criança selecionada: uma só para o sistema todo (o app.js liga ao seletor das telas antigas)
   if (!ctx.sel) ctx.sel = { id: null };
   const financeiro = createFinanceiro(ctx), anamnese = createAnamnese(ctx), plano = createPlano(ctx), prescricao = createPrescricao(ctx, plano);
-  const portal = createPortal(ctx, plano), biblioteca = createBiblioteca(ctx), trilha = createTrilha(ctx);
+  const portal = createPortal(ctx, plano), biblioteca = createBiblioteca(ctx), trilha = createTrilha(ctx), vendas = createVendas(ctx);
   ctx.publicarFamilia = portal.publicar;
   ctx.abrirBiblioteca = aba => biblioteca.abrir(aba);
-  const modulos = [portal, biblioteca, financeiro, anamnese, plano, prescricao, trilha];
-  const renderizadores = { financeiro: financeiro.page, anamnese: anamnese.page, trilha: trilha.page, plano: plano.page, prescricao: prescricao.page, familias: portal.page };
+  const modulos = [portal, biblioteca, financeiro, anamnese, plano, prescricao, trilha, vendas];
+  const renderizadores = { financeiro: financeiro.page, anamnese: anamnese.page, trilha: trilha.page, plano: plano.page, prescricao: prescricao.page, familias: portal.page, vendas: vendas.page };
 
   function garantirEstado() {
     const s = ctx.state;
@@ -88,6 +90,7 @@ export function createModulos(ctx) {
   const ultimoDiaTeste = c => new Date(new Date(c.fimTeste).getTime() - DIA).toISOString();
   function seloAssinatura() {
     const c = lerConta(), st = situacao(c), e = ctx.esc;
+    if (window.MASTIGO_ACESSO?.valido?.()) return `<button class="badge selo-ativa" data-page="vendas" title="Vendas do Mastigô"><span class="dot"></span>Acesso master</button>`;
     if (st === 'sem-conta') return `<a class="badge" href="./index.html#comecar" title="Começar o teste grátis de ${SITE.diasTeste} dias"><span class="dot"></span>Demonstração</a>`;
     if (st === 'aguardando-cartao') return `<a class="badge selo-pendente" href="${e(SITE.checkoutUrl)}"><span class="dot"></span>Cadastrar cartão</a>`;
     if (st === 'teste') { const d = diasRestantes(c); return `<button class="badge selo-teste" data-page="settings" title="Ver a assinatura"><span class="dot"></span>Teste grátis · ${d === 1 ? 'último dia' : `faltam ${d} dias`}</button>`; }
@@ -107,8 +110,8 @@ export function createModulos(ctx) {
   }
   // Pré-lançamento: quem entrou com o acesso master pode sair por aqui (ver acesso-guarda.js)
   function cartaoAcessoMaster() {
-    if (!window.MASTIGO_ACESSO?.ativo) return '';
-    return `<section class="card"><h2>Acesso master do pré-lançamento</h2><p>Enquanto o Mastigô não é aberto ao público, o site pede o usuário e a senha da equipe a cada entrada (em cada aba nova e depois de 30 minutos sem uso).</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
+    if (!window.MASTIGO_ACESSO?.ativo || !window.MASTIGO_ACESSO.valido?.()) return '';
+    return `<section class="card"><h2>Acesso master</h2><p>Você entrou pelo acesso master (o Entrar do rodapé da página inicial). A senha é pedida a cada entrada: em cada aba nova e depois de 30 minutos sem uso.</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
   }
   const cartaoAssinatura = () => cartaoPlano() + cartaoAcessoMaster();
   // Volta do cadastro (?assinatura=teste) ou do Mercado Pago (?assinatura=ok): ativa o teste,
@@ -133,7 +136,7 @@ export function createModulos(ctx) {
     if (situacao(c) !== 'teste') return;
     const nome = ctx.esc(c.nome.split(' ')[0]);
     ctx.modal(`Boas-vindas, ${nome}!`, `<p>Seu teste grátis vai até <b>${dataBR(ultimoDiaTeste(c))}</b>. ${SITE.checkoutUrl ? `A primeira cobrança de ${moedaBR(SITE.preco)} será em ${dataBR(c.fimTeste)}, e você pode cancelar antes no Mercado Pago.` : 'Nada será cobrado sem você cadastrar o cartão.'}</p>
-<p>O sistema já vem com crianças de exemplo, todas fictícias, para você explorar: anamnese, plano alimentar, a escada do comer e a Área da Família.</p>
+<p>Comece cadastrando a primeira criança em <b>Pacientes</b>. Depois vêm a anamnese, a trilha alimentar, o plano, a prescrição e a Área da Família para os pais.</p>
 <p>Seus dados profissionais (nome, e-mail, WhatsApp e CRN) já foram preenchidos em <b>Minha clínica</b>.</p>
 <div class="form-footer"><span>Dados salvos neste navegador</span><button class="button primary" data-action="close">Começar a explorar</button></div>`);
   }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#2a0a5e">
   <meta name="robots" content="noindex, nofollow">
-  <title>Mastigô · Acesso da equipe</title>
+  <title>Mastigô · Acesso master</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,9 +54,9 @@
   <section class="bastidor" aria-labelledby="titulo">
     <img src="./mastigo-logo-branca.svg" alt="Mastigô" width="170" height="45">
     <div class="meio">
-      <span class="etiqueta">Pré-lançamento</span>
-      <h1 id="titulo">Estamos arrumando <em>a mesa.</em></h1>
-      <p>O Mastigô está nos últimos ajustes. Por enquanto, o acesso é só da equipe.</p>
+      <span class="etiqueta">Equipe Mastigô</span>
+      <h1 id="titulo">Entrada da <em>equipe.</em></h1>
+      <p>Esta entrada é do acesso master. Nutricionista que quer usar o Mastigô começa pelo <a href="./index.html#comecar" style="color:#ffc400;font-weight:600">teste grátis de 7 dias</a>.</p>
       <div class="fila" id="fila" aria-hidden="true"></div>
     </div>
     <small>Cada descoberta conta.</small>
@@ -64,13 +64,14 @@
 
   <main class="porta">
     <form class="cartao-acesso" id="acesso" novalidate>
-      <h2>Acesso da equipe</h2>
+      <h2>Acesso master</h2>
       <p>Entre com o usuário e a senha do acesso master.</p>
       <div class="campo"><label for="a-usuario">Usuário</label><input id="a-usuario" name="usuario" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required maxlength="80"></div>
       <div class="campo"><label for="a-senha">Senha</label><div class="senha"><input id="a-senha" name="senha" type="password" autocomplete="current-password" required maxlength="120"><button type="button" class="ver" id="ver-senha" aria-controls="a-senha" aria-pressed="false">Mostrar</button></div></div>
       <p class="erro" id="erro" role="alert"></p>
       <button class="botao botao-roxo largo" id="entrar" type="submit">Entrar</button>
       <p class="rodape-acesso">A senha é pedida a cada entrada: em cada aba nova e sempre que o site ficar 30 minutos sem uso. Para sair antes, use <b>Minha clínica › Sair do acesso master</b>.</p>
+      <p class="rodape-acesso">Fez o cadastro e quer entrar? Use o <a href="./index.html">Entrar do topo da página inicial</a>.</p>
     </form>
   </main>
   <script type="module" src="./acesso.js"></script>

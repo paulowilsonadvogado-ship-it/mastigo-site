@@ -25,10 +25,22 @@ $('#miuda-form').textContent = SITE.checkoutUrl
 const e = SITE.empresa || {};
 $('#empresa').textContent = [e.nome, e.documento, e.endereco, e.email, e.whatsapp && formatarTelefone(normalizarTelefone(e.whatsapp))].filter(Boolean).join(' · ');
 
-// Quem já tem cadastro vê o atalho para o sistema
-if (lerConta()) {
+// "Entrar" do topo é só para quem fez o cadastro e cadastrou o cartão no Mercado Pago.
+// Quem já fez, vê o atalho para o sistema; quem parou antes do cartão, o atalho para terminar.
+const conta = lerConta(), pendente = conta?.status === 'aguardando-cartao' && SITE.checkoutUrl;
+if (conta) {
   const a = document.querySelector('.topo-links .botao');
-  a.textContent = 'Abrir o sistema'; a.href = './sistema.html';
+  if (pendente) { a.textContent = 'Cadastrar o cartão'; a.href = SITE.checkoutUrl; }
+  else { a.textContent = 'Abrir o sistema'; a.href = './sistema.html'; }
+}
+// Veio do "Entrar" sem ter assinado: explica o caminho em cima do formulário
+if (new URLSearchParams(location.search).has('entrar')) {
+  const av = $('#aviso-entrar');
+  av.innerHTML = pendente
+    ? `<b>Falta só o cartão.</b> Seu cadastro está feito; para entrar, conclua a assinatura no Mercado Pago (os ${SITE.diasTeste} primeiros dias são grátis). <a href="${SITE.checkoutUrl}">Cadastrar o cartão</a>`
+    : `<b>Para entrar no Mastigô, faça seu cadastro.</b> Preencha os dados abaixo e cadastre o cartão no Mercado Pago: os ${SITE.diasTeste} primeiros dias são grátis.`;
+  av.hidden = false;
+  history.replaceState(null, '', location.pathname + location.hash);
 }
 
 // ===== Assinatura visual: o brócolis sobe a escada do comer =====

@@ -347,6 +347,7 @@ ${e.tipo === 'flexibilizar' ? '<label class="check"><input type="checkbox" name=
   return {
     page,
     onClick(el) {
+      if (!S().patients.length) return false;
       const d = el.dataset, p = paciente(), t = trilha(p.id);
       if (d.trAdd) { adicionar(d.trAdd, document.getElementById(`tr-add-${d.trAdd}`)?.value); return true; }
       if (d.trItem) { const [l, id] = d.trItem.split('|'); abrirItem(l, id); return true; }
@@ -387,6 +388,7 @@ ${e.tipo === 'flexibilizar' ? '<label class="check"><input type="checkbox" name=
     },
     onChange(e) {
       if (e.id === 'tr-paciente') { ctx.sel.id = e.value; ctx.render(); return true; }
+      if (!S().patients.length) return false;
       const t = trilha(paciente().id);
       if (e.id === 'tr-momento') { t.momento = e.value; ctx.save(); ctx.render(); return true; }
       if (e.dataset?.trMotivo) { const i = t.listas.parou.find(x => x.id === e.dataset.trMotivo); if (i) { i.motivo = e.value; ctx.save(); ctx.render(); } return true; }
@@ -394,6 +396,7 @@ ${e.tipo === 'flexibilizar' ? '<label class="check"><input type="checkbox" name=
       return false;
     },
     onSubmit(form, v) {
+      if (!S().patients.length) return false;
       const t = trilha(paciente().id);
       if (form.id === 'tr-item-form' && itemAberto) {
         const i = acharItem(t, itemAberto.lista, itemAberto.id);
