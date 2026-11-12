@@ -1,4 +1,4 @@
-import { iconeAlimento } from './alimentos-icones.js?v=6c90e3e';
+import { iconeAlimento } from './alimentos-icones.js?v=4ab1eb7';
 export const stages = [
   { id: 'recusou', label: 'Recusou', hint: 'Hoje preferiu não explorar', color: '#b86c72', bg: '#fbedef', icon: 'hand' },
   { id: 'cheirou', label: 'Cheirou', hint: 'Conheceu um novo aroma', color: '#9b7b29', bg: '#fcf4da', icon: 'wind' },

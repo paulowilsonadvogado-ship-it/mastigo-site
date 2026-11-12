@@ -502,3 +502,17 @@ button.badge{cursor:pointer;font-family:inherit}
 .vd-token .button{justify-self:start}
 @media(max-width:1100px){.vd-nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.vd-nums{grid-template-columns:1fr 1fr}.vd-num b{font-size:21px}}
+/* Tabelas de composição (TACO, IBGE, USDA) e medidas caseiras do IBGE */
+.busca-linha{display:flex;gap:8px;align-items:stretch}.busca-linha .search{flex:1}.busca-linha select{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px;color:#4b148f;max-width:44%}
+.tag.fonte{background:#efe6ff;color:#5b1fc0;margin-left:2px}
+.medida-wrap{display:flex;gap:6px;align-items:center}.medida-wrap .icon-button{width:32px;height:32px;flex-shrink:0;color:#7b2ff7}.medida-wrap .icon-button svg{width:16px;height:16px}
+.med-topo{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}.med-topo .field{margin:0!important;min-width:110px}.med-topo .search{flex:1;min-width:200px}
+.med-alimento{font-size:12px;color:#4b148f;margin:14px 0 8px}
+.med-lista{display:flex;flex-wrap:wrap;gap:7px}
+.check-chip.med{flex-direction:column;align-items:flex-start;gap:2px;border:1.5px solid #e6dcf7;border-radius:12px;padding:8px 12px;background:#fff;text-align:left;min-height:44px}
+.check-chip.med b{font-size:12px;color:#2a0a5e}.check-chip.med small{font-size:11px}.check-chip.med:hover,.check-chip.med:focus-visible{border-color:#7b2ff7;background:#f7f2ff}
+#med-res{max-height:52vh;overflow:auto}
+.bib-orig{display:block;font-size:10px;color:var(--muted);font-weight:400;margin-top:2px}
+.bib-fontes{padding:0 20px 18px;display:grid;gap:6px}.bib-fontes p{font-size:11px;color:var(--muted);line-height:1.6;margin:0}
+@media(max-width:640px){.busca-linha{flex-direction:column}.busca-linha select{max-width:100%}}
+.itens .qtd{min-width:68px}

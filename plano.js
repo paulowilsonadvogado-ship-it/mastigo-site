@@ -1,18 +1,14 @@
-// Plano alimentar calculado com a TACO (estilo WebDiet/Dietbox/Nutrium), com lista de substituições
+// Plano alimentar calculado com as tabelas TACO, IBGE (POF 2008-2009) e USDA (estilo WebDiet/Dietbox/Nutrium), com lista de substituições
 // por equivalência energética (método de equivalentes, como nas listas de trocas dos EUA e o
 // "método de troca de alimentos" chinês) e trilha de alimentos-ponte (food chaining) para seletividade.
-import { tacoDados, tacoCategorias, tacoCampos, tacoFonte } from './taco.js?v=6c90e3e';
-import { foods, icoAlimento } from './data.js?v=6c90e3e';
-import { uid, num, dataBR } from './util-nutri.js?v=6c90e3e';
-import { detectarAlergenicos } from './alergenicos.js?v=6c90e3e';
-import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=6c90e3e';
+import { CAMPOS, baseTaco, acharNasTabelas, baseTabelas, tabelaPorId, PRIORIDADE, FILTROS, rotuloFonte, medidasDe, buscarMedidas, termoMedida, medidaTexto, qtdTexto, medidasFonte } from './tabelas.js?v=4ab1eb7';
+import { foods, icoAlimento } from './data.js?v=4ab1eb7';
+import { uid, num, dataBR } from './util-nutri.js?v=4ab1eb7';
+import { detectarAlergenicos } from './alergenicos.js?v=4ab1eb7';
+import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=4ab1eb7';
 
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-const CAMPOS = tacoCampos; // kcal, ptn, lip, cho, fibra, ca, fe, zn, na, k, vitA, vitC, mg
-
-// Base unificada: TACO + alimentos cadastrados pela nutricionista
-export const baseTaco = tacoDados.map(r => ({ id: 't' + r[0], nome: r[2], cat: tacoCategorias[r[1]], fonte: 'TACO', n: Object.fromEntries(CAMPOS.map((c, i) => [c, r[3 + i]])) }));
-const indiceTaco = new Map(baseTaco.map(a => [a.id, a]));
+export { baseTaco }; // compatibilidade: a base unificada (TACO + IBGE + USDA) fica em tabelas.js
 
 export const refeicoesPadrao = () => [
   { id: uid(), nome: 'Café da manhã', horario: '07:30', itens: [], texto: '' },
@@ -41,8 +37,11 @@ export function somar(itens, achar) {
 export function createPlano(ctx) {
   const { esc, icon, heading, button, toast, modal, close } = ctx;
   const S = () => ctx.state;
-  const achar = id => indiceTaco.get(id) || S().alimentosProprios.find(a => a.id === id) || null;
-  const todos = () => [...S().alimentosProprios, ...baseTaco];
+  const achar = id => acharNasTabelas(id) || S().alimentosProprios.find(a => a.id === id) || null;
+  // Tabela usada na busca do plano (preferência salva): todas, TACO, IBGE, USDA ou só os alimentos próprios
+  const filtro = () => FILTROS.some(([id]) => id === S().tabelaBusca) ? S().tabelaBusca : 'todas';
+  const todos = (f = filtro()) => [...(f === 'todas' || f === 'Próprio' ? S().alimentosProprios : []), ...(f === 'Próprio' ? [] : baseTabelas(f))];
+  const tagFonte = a => a?.fonte === 'Próprio' ? ' <span class="tag">próprio</span>' : a?.fonte ? ` <span class="tag fonte" title="${esc(tabelaPorId[a.fonte]?.fonte || a.fonte)}${a.original ? ' · ' + esc(a.original) : ''}">${esc(a.fonte)}</span>` : '';
   const pac = () => S().patients.find(p => p.id === ctx.sel.id) || S().patients[0];
   const anam = id => S().anamneses[id] || (S().anamneses[id] = { evolucoes: [] });
   function plano(id) {
@@ -87,8 +86,9 @@ export function createPlano(ctx) {
     }
     const comAlerg = [...new Set(itens.flatMap(i => detectarAlergenicos(achar(i.food)?.nome, a.alergenicos || []).map(x => `${achar(i.food)?.nome} (${x.id})`)))];
     if (comAlerg.length) alertas.unshift(`ALERGIA: possíveis alergênicos da criança no plano — ${comAlerg.join('; ')}`);
-    if (faltando.size) alertas.push(`Alguns alimentos não têm valor na TACO para: ${[...faltando].map(c => rotulosNutrientes[c]?.[0] || c).join(', ')} (o total pode estar subestimado)`);
-    return `<div class="card-head"><div><h2>Resumo do plano</h2><p>${itens.length} alimento(s) · ${esc(tacoFonte)}</p></div></div>
+    if (faltando.size) alertas.push(`Alguns alimentos não têm valor na tabela de origem para: ${[...faltando].map(c => rotulosNutrientes[c]?.[0] || c).join(', ')} (o total pode estar subestimado)`);
+    const fontes = [...new Set(itens.map(i => achar(i.food)?.fonte).filter(Boolean))].sort((x, y) => PRIORIDADE[x] - PRIORIDADE[y]).map(f => f === 'Próprio' ? 'alimentos próprios' : f);
+    return `<div class="card-head"><div><h2>Resumo do plano</h2><p>${itens.length} alimento(s)${fontes.length ? ' · ' + esc(fontes.join(', ')) : ''}</p></div></div>
 <div class="resumo-kcal"><div><b>${num(kcal, 0)}</b><span>kcal no plano</span></div><div><b>${nec.meta ? num(nec.meta, 0) : '–'}</b><span>meta (VET)</span></div><div><b class="${nec.meta && Math.abs(kcal - nec.meta) / nec.meta <= 0.1 ? 'ok' : 'alerta'}">${nec.meta ? num(kcal / nec.meta * 100, 0) + '%' : '–'}</b><span>adequação</span></div></div>
 <div class="macros">${macro('cho', 'Carboidratos')}${macro('ptn', 'Proteínas')}${macro('lip', 'Lipídios')}</div>
 <div class="progress-wrap">${barra('Proteínas (RDA/kg)', t.ptn, m?.ptn, 'g')}${barra('Fibra alimentar', t.fibra, m?.fibra, 'g')}${barra('Cálcio', t.ca, m?.ca, 'mg')}${barra('Ferro', t.fe, m?.fe, 'mg')}${barra('Zinco', t.zn, m?.zn, 'mg')}${barra('Vitamina A (RAE)', t.vitA, m?.vitA, 'µg')}${barra('Vitamina C', t.vitC, m?.vitC, 'mg')}${barra('Sódio', t.na, m?.naMax, 'mg', ' <small>(limite)</small>')}</div>
@@ -101,9 +101,9 @@ ${alertas.length ? `<div class="alertas">${alertas.map(x => `<p>${icon('bell')}$
     const a = achar(it.food), f = (Number(it.g) || 0) / 100;
     const alerg = detectarAlergenicos(a?.nome, alergiasDe());
     const v = c => a?.n[c] == null ? '–' : num(a.n[c] * f, c === 'kcal' ? 0 : 1);
-    return `<tr data-item="${esc(it.id)}"><td><strong>${esc(a?.nome || 'Alimento removido')}</strong>${a?.fonte === 'Próprio' ? ' <span class="tag">próprio</span>' : ''}${alerg.map(x => ` <span class="tag alerg" title="Possível presença de alergênico (RDC 26/2015). Confira o rótulo/preparação.">⚠ ${esc(x.id)}</span>`).join('')}${it.subs?.length ? `<br><small>${it.subs.length} substituição(ões)</small>` : ''}</td>
+    return `<tr data-item="${esc(it.id)}"><td><strong>${esc(a?.nome || 'Alimento removido')}</strong>${tagFonte(a)}${alerg.map(x => ` <span class="tag alerg" title="Possível presença de alergênico (RDC 26/2015). Confira o rótulo/preparação.">⚠ ${esc(x.id)}</span>`).join('')}${it.subs?.length ? `<br><small>${it.subs.length} substituição(ões)</small>` : ''}</td>
 <td><input class="qtd" type="number" min="0" max="3000" step="1" value="${esc(it.g)}" data-qtd="${esc(r.id)}|${esc(it.id)}" aria-label="Quantidade em gramas"></td>
-<td><input class="medida" maxlength="60" value="${esc(it.medida || '')}" placeholder="Ex.: 2 col. sopa" data-medida="${esc(r.id)}|${esc(it.id)}" aria-label="Medida caseira"></td>
+<td><div class="medida-wrap"><input class="medida" maxlength="60" value="${esc(it.medida || '')}" placeholder="Ex.: 2 col. sopa" data-medida="${esc(r.id)}|${esc(it.id)}" aria-label="Medida caseira"><button class="icon-button" data-medidas="${esc(r.id)}|${esc(it.id)}" aria-label="Escolher medida caseira do IBGE" title="Medidas caseiras do IBGE">${icon('spoon')}</button></div></td>
 <td id="kc-${esc(it.id)}">${v('kcal')}</td><td id="pt-${esc(it.id)}">${v('ptn')}</td><td id="ch-${esc(it.id)}">${v('cho')}</td><td id="li-${esc(it.id)}">${v('lip')}</td>
 <td><div class="acoes"><button class="icon-button" data-subs="${esc(r.id)}|${esc(it.id)}" aria-label="Substituições" title="Lista de substituições">${icon('spark')}</button><button class="icon-button" data-del-item="${esc(r.id)}|${esc(it.id)}" aria-label="Remover alimento">${icon('trash')}</button></div></td></tr>`;
   }
@@ -112,7 +112,7 @@ ${alertas.length ? `<div class="alertas">${alertas.map(x => `<p>${icon('bell')}$
     const s = somar(r.itens, achar).t;
     const cores = ['#7b2ff7', '#ff2e7e', '#ff7a00', '#00bfa6', '#1e8bff', '#d4148f', '#8a6a00'];
     return `<section class="card refeicao" style="--ref:${cores[i % cores.length]}"><div class="ref-head"><input class="ref-hora" type="time" value="${esc(r.horario)}" data-ref-hora="${esc(r.id)}" aria-label="Horário"><input class="ref-nome" value="${esc(r.nome)}" maxlength="40" data-ref-nome="${esc(r.id)}" aria-label="Nome da refeição"><span class="ref-kcal" id="sub-${esc(r.id)}">${num(s.kcal, 0)} kcal</span><button class="icon-button" data-del-ref="${esc(r.id)}" aria-label="Remover refeição">${icon('trash')}</button></div>
-<div class="busca-wrap"><label class="search">${icon('search')}<input data-busca="${esc(r.id)}" placeholder="Buscar na TACO ou nos seus alimentos (ex.: banana prata, arroz cozido)" aria-label="Buscar alimento"></label><div class="busca-res" id="res-${esc(r.id)}"></div></div>
+<div class="busca-wrap"><div class="busca-linha"><label class="search">${icon('search')}<input data-busca="${esc(r.id)}" placeholder="Buscar alimento (ex.: banana prata, arroz cozido)" aria-label="Buscar alimento"></label><select data-tabela-busca="${esc(r.id)}" aria-label="Tabela usada na busca">${FILTROS.map(([id, l]) => `<option value="${id}" ${filtro() === id ? 'selected' : ''}>${l}</option>`).join('')}</select></div><div class="busca-res" id="res-${esc(r.id)}"></div></div>
 ${r.itens.length ? `<div class="table-wrap"><table class="itens"><thead><tr><th>ALIMENTO</th><th>GRAMAS</th><th>MEDIDA CASEIRA</th><th>KCAL</th><th>PTN</th><th>CHO</th><th>LIP</th><th></th></tr></thead><tbody>${r.itens.map(it => linhaItem(r, it)).join('')}</tbody><tfoot><tr><td>Subtotal</td><td></td><td></td><td id="st-kc-${esc(r.id)}">${num(s.kcal, 0)}</td><td>${num(s.ptn, 1)}</td><td>${num(s.cho, 1)}</td><td>${num(s.lip, 1)}</td><td></td></tr></tfoot></table></div>` : ''}
 <div class="field" style="padding:0 20px 18px"><label>Opções e orientações desta refeição (plano qualitativo)</label><textarea rows="2" maxlength="1500" data-ref-texto="${esc(r.id)}" placeholder="Ex.: oferecer o alimento novo em um pratinho separado, junto com os alimentos já aceitos">${esc(r.texto || '')}</textarea></div></section>`;
   }
@@ -132,7 +132,7 @@ ${pl.alvos.length ? `<div class="alvos">${pl.alvos.map(x => { const f = foods.fi
     const p = pac(); ctx.sel.id = p.id;
     const a = anam(p.id), pl = plano(p.id), nec = necessidades(p, a, pl);
     const distSoma = Number(pl.dist.cho) + Number(pl.dist.ptn) + Number(pl.dist.lip);
-    return heading('Plano alimentar', 'Calculado com a Tabela TACO, metas pediátricas e lista de substituições.',
+    return heading('Plano alimentar', 'Calculado com as tabelas TACO, IBGE e USDA, medidas caseiras do IBGE, metas pediátricas e lista de substituições.',
       `<select id="pl-paciente" class="select-big" aria-label="Criança">${S().patients.map(x => `<option value="${esc(x.id)}" ${x.id === p.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>${button('Modelos', 'pl-modelos', 'book')}${button('Alimento próprio', 'pl-alimento', 'plus')}${button('Gerar prescrição', 'pl-prescrever', 'pen', true)}`) +
       `<section class="card necessidades"><div class="card-head"><div><h2>Necessidades energéticas</h2><p>Dados da anamnese. Ajuste aqui se precisar.</p></div></div><form id="pl-nec" class="field-grid six">
 <div class="field"><label for="pl-sexo">Sexo</label><select id="pl-sexo" name="sexo"><option value="">–</option><option value="F" ${a.sexo === 'F' ? 'selected' : ''}>Feminino</option><option value="M" ${a.sexo === 'M' ? 'selected' : ''}>Masculino</option></select></div>
@@ -161,7 +161,7 @@ ${pontesHTML(p, a, pl)}</div><aside class="card resumo-plano" id="plano-resumo">
     const t = norm(termo).trim(); if (t.length < 2) return [];
     const palavras = t.split(/\s+/);
     return todos().filter(a => palavras.every(w => norm(a.nome).includes(w)))
-      .sort((x, y) => (norm(y.nome).startsWith(palavras[0]) - norm(x.nome).startsWith(palavras[0])) || x.nome.length - y.nome.length).slice(0, 14);
+      .sort((x, y) => (norm(y.nome).startsWith(palavras[0]) - norm(x.nome).startsWith(palavras[0])) || (PRIORIDADE[x.fonte] ?? 9) - (PRIORIDADE[y.fonte] ?? 9) || x.nome.length - y.nome.length).slice(0, 20);
   }
 
   function substituicoes(item) {
@@ -169,7 +169,7 @@ ${pontesHTML(p, a, pl)}</div><aside class="card resumo-plano" id="plano-resumo">
     const kcalItem = (a.n.kcal || 0) * (Number(item.g) || 0) / 100;
     const perfil = x => { const k = (x.n.cho || 0) * 4 + (x.n.ptn || 0) * 4 + (x.n.lip || 0) * 9 || 1; return [(x.n.cho || 0) * 4 / k, (x.n.ptn || 0) * 4 / k, (x.n.lip || 0) * 9 / k]; };
     const pa = perfil(a);
-    return todos().filter(x => x.id !== a.id && x.cat === a.cat && x.n.kcal > 0)
+    return todos('todas').filter(x => x.id !== a.id && x.cat === a.cat && x.n.kcal > 0)
       .map(x => { const px = perfil(x); return { x, d: Math.hypot(px[0] - pa[0], px[1] - pa[1], px[2] - pa[2]), g: kcalItem ? Math.round(kcalItem / x.n.kcal * 100) : 0 }; })
       .sort((u, v) => u.d - v.d).slice(0, 18);
   }
@@ -180,6 +180,21 @@ ${pontesHTML(p, a, pl)}</div><aside class="card resumo-plano" id="plano-resumo">
     modal(`Substituições para ${esc(a?.nome || '')}`, `<p>Alimentos do mesmo grupo (${esc(a?.cat || '')}) em quantidade com a mesma energia de ${num(it.g, 0)} g (${num((a?.n.kcal || 0) * it.g / 100, 0)} kcal), ordenados pela semelhança de carboidratos, proteínas e lipídios.</p>
 <form id="pl-subs-form" data-ref="${esc(rid)}" data-item="${esc(iid)}"><div class="subs-lista">${lista.map(({ x, g }) => `<label class="check-chip sub"><input type="checkbox" name="subs" value="${esc(x.id)}|${g}" ${it.subs?.some(s => s.food === x.id) ? 'checked' : ''}><span><b>${esc(x.nome)}</b><small>${g} g · ${num(x.n.ptn * g / 100, 1)} g ptn · ${num(x.n.cho * g / 100, 1)} g cho</small></span></label>`).join('') || '<div class="empty">Sem alimentos equivalentes no grupo.</div>'}</div>
 <div class="form-footer"><button type="button" class="button" data-action="close">Cancelar</button><button class="button primary" type="submit">Salvar substituições</button></div></form>`);
+  }
+
+  // Medidas caseiras do IBGE: as do próprio alimento (se for do IBGE) ou as de alimentos parecidos, pela busca
+  function listaMedidas(chave, termo, item) {
+    const grupos = chave && !termo ? [{ nome: null, medidas: medidasDe(chave) }] : buscarMedidas(termo).map(a => ({ nome: a.nome, medidas: medidasDe(a.medidas) }));
+    if (!grupos.length || !grupos.some(g => g.medidas.length)) return `<div class="empty">${termo ? 'Nenhum alimento do IBGE com esse nome. Tente outra palavra (ex.: arroz, feijão, banana).' : 'Busque o alimento acima.'}</div>`;
+    return grupos.map(g => `${g.nome ? `<h3 class="med-alimento">${esc(g.nome)}</h3>` : ''}<div class="med-lista">${g.medidas.filter(m => m.nome !== 'mililitro').map(m => `<button type="button" class="check-chip med" data-med="${esc(item)}|${m.g}|${esc(m.nome)}"><b>${esc(m.nome)}</b><small>${String(m.g).replace('.', ',')} g</small></button>`).join('')}</div>`).join('');
+  }
+  function abrirMedidas(chave) {
+    const { it } = acharItem(chave); if (!it) return;
+    const a = achar(it.food), exata = a?.medidas;
+    const termo = exata ? '' : termoMedida(a?.nome);
+    modal(`Medida caseira · ${esc(a?.nome || '')}`, `<p>${exata ? 'Medidas referidas para este alimento' : 'Este alimento não é da tabela do IBGE: veja as medidas de alimentos parecidos e confira se valem para ele'} (${esc(medidasFonte)}). Escolha a quantidade e a medida; os gramas do item são preenchidos.</p>
+<div class="med-topo"><div class="field"><label for="med-qtd">Quantidade</label><select id="med-qtd">${[0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 5, 6].map(q => `<option value="${q}" ${q === 1 ? 'selected' : ''}>${qtdTexto(q)}</option>`).join('')}</select></div><label class="search">${icon('search')}<input id="med-busca" data-med-item="${esc(chave)}" data-med-chave="${esc(exata || '')}" value="${esc(termo)}" placeholder="${exata ? 'Ou busque medidas de outro alimento do IBGE' : 'Buscar alimento do IBGE (ex.: arroz, feijão)'}" aria-label="Buscar medidas de outro alimento"></label></div>
+<div id="med-res">${listaMedidas(exata, termo, chave)}</div>`);
   }
 
   function modelos() {
@@ -214,6 +229,13 @@ ${ms.length ? `<div class="table-wrap" style="margin-top:16px"><table><thead><tr
       if (d.delItem) { const { r, it } = acharItem(d.delItem); if (r && it) { r.itens = r.itens.filter(x => x !== it); ctx.save(); ctx.render(); } return true; }
       if (d.delRef) { const pl = plano(pac().id); pl.refeicoes = pl.refeicoes.filter(x => x.id !== d.delRef); ctx.save(); ctx.render(); toast('Refeição removida.'); return true; }
       if (d.subs) { const [r, i] = d.subs.split('|'); abrirSubs(r, i); return true; }
+      if (d.medidas) { abrirMedidas(d.medidas); return true; }
+      if (d.med) {
+        const [rid, iid, g, nome] = d.med.split('|'), { it } = acharItem(rid + '|' + iid); if (!it) return true;
+        const q = Number(document.getElementById('med-qtd')?.value) || 1, gramas = q * Number(g);
+        it.g = gramas >= 10 ? Math.round(gramas) : Math.round(gramas * 10) / 10; it.medida = medidaTexto(q, nome).slice(0, 60);
+        ctx.save(); close(); ctx.render(); toast(`${it.medida} = ${String(it.g).replace('.', ',')} g`); return true;
+      }
       if (d.alvo) { plano(pac().id).alvos.push({ food: d.alvo, etapa: 0 }); avisarEscada(); ctx.save(); ctx.render(); toast('Alimento-alvo adicionado.'); return true; }
       if (d.delAlvo) { const pl = plano(pac().id); pl.alvos = pl.alvos.filter(x => x.food !== d.delAlvo); ctx.save(); ctx.render(); return true; }
       if (d.etapa) { const [f, i] = d.etapa.split('|'); const x = plano(pac().id).alvos.find(y => y.food === f); if (x) { x.etapa = Number(i); avisarEscada(); ctx.save(); ctx.render(); } return true; }
@@ -234,8 +256,8 @@ ${ms.length ? `<div class="table-wrap" style="margin-top:16px"><table><thead><tr
     onInput(e) {
       if (e.dataset.busca) {
         const rid = e.dataset.busca, box = document.getElementById('res-' + rid), lista = resultados(e.value);
-        const dicaLeite = /leite/.test(norm(e.value)) ? '<p class="helper" style="padding:6px 12px">Leite de vaca integral/desnatado fluido não tem valores completos na TACO: cadastre como "Alimento próprio" pelo rótulo.</p>' : '';
-        box.innerHTML = lista.length ? lista.map(a => `<button type="button" data-add-food="${esc(rid)}|${esc(a.id)}"><span><b>${esc(a.nome)}</b><small>${esc(a.cat)} · ${a.fonte}</small></span><em>${detectarAlergenicos(a.nome, alergiasDe()).length ? '⚠ alergênico · ' : ''}${a.n.kcal == null ? 'sem dados' : num(a.n.kcal, 0) + ' kcal/100 g'}</em></button>`).join('') + dicaLeite : (e.value.trim().length >= 2 ? '<p class="helper" style="padding:10px 12px">Nenhum alimento encontrado. Cadastre um alimento próprio.</p>' : '') + dicaLeite;
+        const dicaLeite = /leite/.test(norm(e.value)) && filtro() === 'TACO' ? '<p class="helper" style="padding:6px 12px">Na TACO, o leite de vaca fluido não tem valores completos: use o do IBGE ou da USDA (escolha "Todas as tabelas") ou cadastre como alimento próprio pelo rótulo.</p>' : '';
+        box.innerHTML = lista.length ? lista.map(a => `<button type="button" data-add-food="${esc(rid)}|${esc(a.id)}"${a.original ? ` title="${esc(a.original)}"` : ''}><span><b>${esc(a.nome)}</b><small>${esc(a.cat)} · ${esc(rotuloFonte(a))}</small></span><em>${detectarAlergenicos(a.nome, alergiasDe()).length ? '⚠ alergênico · ' : ''}${a.n.kcal == null ? 'sem dados' : num(a.n.kcal, 0) + ' kcal/100 g'}</em></button>`).join('') + dicaLeite : (e.value.trim().length >= 2 ? '<p class="helper" style="padding:10px 12px">Nenhum alimento encontrado. Cadastre um alimento próprio.</p>' : '') + dicaLeite;
         return true;
       }
       if (e.dataset.qtd) {
@@ -247,6 +269,7 @@ ${ms.length ? `<div class="table-wrap" style="margin-top:16px"><table><thead><tr
         const st = document.getElementById('st-kc-' + r.id); if (st) st.textContent = num(s.kcal, 0);
         atualizarResumo(); ctx.save(); return true;
       }
+      if (e.id === 'med-busca') { const box = document.getElementById('med-res'); if (box) box.innerHTML = listaMedidas(e.dataset.medChave, e.value.trim(), e.dataset.medItem); return true; }
       if (e.dataset.medida) { const { it } = acharItem(e.dataset.medida); if (it) { it.medida = e.value.slice(0, 60); ctx.save(); } return true; }
       if (e.dataset.refNome) { const r = plano(pac().id).refeicoes.find(x => x.id === e.dataset.refNome); if (r) { r.nome = e.value.slice(0, 40); ctx.save(); } return true; }
       if (e.dataset.refTexto) { const r = plano(pac().id).refeicoes.find(x => x.id === e.dataset.refTexto); if (r) { r.texto = e.value.slice(0, 1500); ctx.save(); } return true; }
@@ -255,6 +278,12 @@ ${ms.length ? `<div class="table-wrap" style="margin-top:16px"><table><thead><tr
     },
     onChange(e) {
       if (e.id === 'pl-paciente') { ctx.sel.id = e.value; ctx.render(); return true; }
+      if (e.dataset.tabelaBusca) {
+        S().tabelaBusca = e.value; ctx.save();
+        document.querySelectorAll('[data-tabela-busca]').forEach(s => { s.value = e.value; });
+        const campo = document.querySelector(`[data-busca="${CSS.escape(e.dataset.tabelaBusca)}"]`); if (campo?.value.trim()) this.onInput(campo);
+        return true;
+      }
       if (e.dataset.refHora) { const pl = plano(pac().id), r = pl.refeicoes.find(x => x.id === e.dataset.refHora); if (r) { r.horario = e.value; pl.refeicoes.sort((x, y) => x.horario.localeCompare(y.horario)); ctx.save(); ctx.render(); } return true; }
       if (e.dataset.qtd) { ctx.render(); return true; }
       return false;
