@@ -1,5 +1,5 @@
 // Módulo Financeiro do consultório (inspirado no controle financeiro de WebDiet, Dietbox, Nutrium e Practice Better).
-import { uid, moeda, dataBR, mesAtual, somaMeses, nomeMes, extenso, imprimir, baixarCSV } from './util-nutri.js?v=4ab1eb7';
+import { uid, moeda, dataBR, mesAtual, somaMeses, nomeMes, extenso, imprimir, baixarCSV } from './util-nutri.js?v=e2cde6a';
 
 export const categoriasReceita = ['Consulta', 'Retorno', 'Pacote de acompanhamento', 'Avaliação de seletividade', 'Terapia alimentar (sessão)', 'Plano alimentar avulso', 'Teleconsulta', 'Convênio', 'Palestra / curso', 'Outras receitas'];
 export const categoriasDespesa = ['Aluguel / sala', 'Software e assinaturas', 'Marketing e anúncios', 'Impostos e taxas', 'Contador', 'Anuidade CRN', 'Materiais e brinquedos terapêuticos', 'Alimentos para sessões', 'Cursos e congressos', 'Internet e telefone', 'Transporte', 'Taxas de cartão / maquininha', 'Outras despesas'];

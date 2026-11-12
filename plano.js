@@ -1,11 +1,11 @@
 // Plano alimentar calculado com as tabelas TACO, IBGE (POF 2008-2009) e USDA (estilo WebDiet/Dietbox/Nutrium), com lista de substituições
 // por equivalência energética (método de equivalentes, como nas listas de trocas dos EUA e o
 // "método de troca de alimentos" chinês) e trilha de alimentos-ponte (food chaining) para seletividade.
-import { CAMPOS, baseTaco, acharNasTabelas, baseTabelas, tabelaPorId, PRIORIDADE, FILTROS, rotuloFonte, medidasDe, buscarMedidas, termoMedida, medidaTexto, qtdTexto, medidasFonte } from './tabelas.js?v=4ab1eb7';
-import { foods, icoAlimento } from './data.js?v=4ab1eb7';
-import { uid, num, dataBR } from './util-nutri.js?v=4ab1eb7';
-import { detectarAlergenicos } from './alergenicos.js?v=4ab1eb7';
-import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=4ab1eb7';
+import { CAMPOS, baseTaco, acharNasTabelas, baseTabelas, tabelaPorId, PRIORIDADE, FILTROS, rotuloFonte, medidasDe, buscarMedidas, termoMedida, medidaTexto, qtdTexto, medidasFonte } from './tabelas.js?v=e2cde6a';
+import { foods, icoAlimento } from './data.js?v=e2cde6a';
+import { uid, num, dataBR } from './util-nutri.js?v=e2cde6a';
+import { detectarAlergenicos } from './alergenicos.js?v=e2cde6a';
+import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=e2cde6a';
 
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 export { baseTaco }; // compatibilidade: a base unificada (TACO + IBGE + USDA) fica em tabelas.js
@@ -197,6 +197,15 @@ ${pontesHTML(p, a, pl)}</div><aside class="card resumo-plano" id="plano-resumo">
 <div id="med-res">${listaMedidas(exata, termo, chave)}</div>`);
   }
 
+  function aplicarNec(v) {
+    const p = pac(), a = anam(p.id), pl = plano(p.id);
+    for (const k of ['sexo', 'nascimento', 'peso', 'estatura']) a[k] = v[k];
+    if (v.sexo) p.sexo = v.sexo;
+    if (v.nascimento) { const anos = idadeEmAnos(v.nascimento); if (anos != null) p.age = idadeTexto(anos); }
+    pl.atividade = v.atividade; pl.vetMeta = v.vetMeta;
+    pl.dist = { cho: Number(v.cho) || 0, ptn: Number(v.ptn) || 0, lip: Number(v.lip) || 0 };
+  }
+
   function modelos() {
     const ms = S().modelosPlano;
     modal('Modelos de plano alimentar', `<p>Salve o plano atual como modelo ou aplique um modelo salvo. Os alimentos e quantidades são copiados; ajuste depois para a criança.</p>
@@ -288,14 +297,14 @@ ${ms.length ? `<div class="table-wrap" style="margin-top:16px"><table><thead><tr
       if (e.dataset.qtd) { ctx.render(); return true; }
       return false;
     },
+    autosalvar(form) {
+      if (form.id !== 'pl-nec' || !pac()) return false;
+      aplicarNec(Object.fromEntries(new FormData(form))); ctx.save(); return true;
+    },
     onSubmit(form, v) {
       if (form.id === 'pl-nec') {
-        const p = pac(), a = anam(p.id), pl = plano(p.id);
-        for (const k of ['sexo', 'nascimento', 'peso', 'estatura']) a[k] = v[k];
-        if (v.sexo) p.sexo = v.sexo;
-        if (v.nascimento) { const anos = idadeEmAnos(v.nascimento); if (anos != null) p.age = idadeTexto(anos); }
-        pl.atividade = v.atividade; pl.vetMeta = v.vetMeta;
-        pl.dist = { cho: Number(v.cho) || 0, ptn: Number(v.ptn) || 0, lip: Number(v.lip) || 0 };
+        aplicarNec(v);
+        const pl = plano(pac().id);
         ctx.save(); ctx.render();
         toast(pl.dist.cho + pl.dist.ptn + pl.dist.lip === 100 ? 'Necessidades recalculadas.' : 'Atenção: a soma dos macronutrientes deve ser 100%.');
         return true;

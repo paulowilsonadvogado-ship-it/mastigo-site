@@ -1,6 +1,6 @@
 // Situação da assinatura do profissional (teste de 7 dias → mensal). Nesta versão sem servidor, fica no
 // navegador; quando o servidor estiver no ar, a confirmação vem do Mercado Pago (webhook) e não daqui.
-import { SITE } from './config-site.js?v=4ab1eb7';
+import { SITE } from './config-site.js?v=e2cde6a';
 const CHAVE = 'mastigo-conta';
 const DIA = 86400000;
 export function lerConta() { try { return JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch { return null; } }

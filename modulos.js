@@ -1,16 +1,16 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js?v=4ab1eb7';
-import { createAnamnese } from './anamnese.js?v=4ab1eb7';
-import { createPlano } from './plano.js?v=4ab1eb7';
-import { createPrescricao } from './prescricao.js?v=4ab1eb7';
-import { createPortal } from './portal.js?v=4ab1eb7';
-import { createBiblioteca } from './biblioteca.js?v=4ab1eb7';
-import { createTrilha, trilhaDemo } from './trilha.js?v=4ab1eb7';
-import { createVendas } from './vendas.js?v=4ab1eb7';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=4ab1eb7';
-import { SITE } from './config-site.js?v=4ab1eb7';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js?v=4ab1eb7';
-import { formatarTelefone } from './whatsapp.js?v=4ab1eb7';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=e2cde6a';
+import { createAnamnese } from './anamnese.js?v=e2cde6a';
+import { createPlano } from './plano.js?v=e2cde6a';
+import { createPrescricao } from './prescricao.js?v=e2cde6a';
+import { createPortal } from './portal.js?v=e2cde6a';
+import { createBiblioteca } from './biblioteca.js?v=e2cde6a';
+import { createTrilha, trilhaDemo } from './trilha.js?v=e2cde6a';
+import { createVendas } from './vendas.js?v=e2cde6a';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=e2cde6a';
+import { SITE } from './config-site.js?v=e2cde6a';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js?v=e2cde6a';
+import { formatarTelefone } from './whatsapp.js?v=e2cde6a';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -155,6 +155,36 @@ export function createModulos(ctx) {
 <div class="form-footer"><span>Salvo neste navegador</span><button class="button primary" type="submit">Salvar</button></div></form>`;
   }
 
+  function aplicarPerfil(values) {
+    const p = ctx.state.perfil;
+    for (const k of ['clinica', 'nome', 'crn', 'regiaoCrn', 'documento', 'telefone', 'email', 'instagram', 'cidade', 'endereco']) p[k] = (values[k] || '').trim();
+    if (p.clinica) ctx.state.clinic = p.clinica;
+    if (p.nome) ctx.state.professional = p.nome;
+  }
+  // Salvamento automático dos formulários longos (anamnese, necessidades do plano, perfil): grava 0,6 s depois
+  // da última digitação, sem redesenhar a tela. Antes, quem saía da página sem clicar em "Salvar" perdia tudo.
+  let timerAuto = null, formAuto = null;
+  function autosalvarAgora() {
+    clearTimeout(timerAuto); timerAuto = null;
+    const form = formAuto; formAuto = null;
+    if (!form || !document.body.contains(form)) return;
+    let ok = false;
+    if (form.id === 'perfil-form') { aplicarPerfil(Object.fromEntries(new FormData(form))); ctx.save(); ok = true; }
+    else ok = modulos.some(m => m.autosalvar?.(form));
+    if (ok) { const el = form.querySelector('.autosalvo') || form.insertAdjacentHTML('beforeend', '<p class="autosalvo" role="status"></p>') || form.querySelector('.autosalvo'); el.textContent = 'Salvo automaticamente às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+  }
+  function agendarAutosalvar(e) {
+    const form = e.closest?.('form');
+    if (!form || !['an-form', 'pl-nec', 'perfil-form'].includes(form.id) || e.type === 'file') return;
+    if (formAuto && formAuto !== form) autosalvarAgora();
+    formAuto = form; clearTimeout(timerAuto); timerAuto = setTimeout(autosalvarAgora, 600);
+  }
+  // Ao trocar de página ou fechar a aba, grava o que estiver pendente
+  addEventListener('hashchange', autosalvarAgora, true);
+  addEventListener('pagehide', autosalvarAgora);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') autosalvarAgora(); });
+  document.addEventListener('click', e => { if (formAuto && !formAuto.contains(e.target) && e.target.closest?.('a, button, [data-page]')) autosalvarAgora(); }, true);
+
   return {
     paginas: paginasConsultorio,
     renderizadores,
@@ -184,22 +214,17 @@ export function createModulos(ctx) {
       if (el.dataset.action === 'perfil-remover-logo') { ctx.state.perfil.logo = ''; ctx.save(); ctx.render(); return true; }
       return modulos.some(m => m.onClick?.(el));
     },
-    onInput(e) { return modulos.some(m => m.onInput?.(e)); },
+    onInput(e) { agendarAutosalvar(e); return modulos.some(m => m.onInput?.(e)); },
     onChange(e) {
       if (e.id === 'pf-logo' && e.files?.[0]) {
         lerImagem(e.files[0], 600).then(img => { ctx.state.perfil.logo = img; ctx.save(); ctx.render(); ctx.toast('Logotipo salvo.'); }).catch(err => ctx.toast(err.message));
         return true;
       }
+      agendarAutosalvar(e);
       return modulos.some(m => m.onChange?.(e));
     },
     onSubmit(form, values) {
-      if (form.id === 'perfil-form') {
-        const p = ctx.state.perfil;
-        for (const k of ['clinica', 'nome', 'crn', 'regiaoCrn', 'documento', 'telefone', 'email', 'instagram', 'cidade', 'endereco']) p[k] = (values[k] || '').trim();
-        if (p.clinica) ctx.state.clinic = p.clinica;
-        if (p.nome) ctx.state.professional = p.nome;
-        ctx.save(); ctx.render(); ctx.toast('Dados salvos.'); return true;
-      }
+      if (form.id === 'perfil-form') { aplicarPerfil(values); ctx.save(); ctx.render(); ctx.toast('Dados salvos.'); return true; }
       if (form.id === 'wa-config-form') {
         ctx.state.whatsapp = { modo: 'manual', perguntar: !!values.perguntar };
         ctx.state.perfil.linkPortal = (values.linkPortal || '').trim();

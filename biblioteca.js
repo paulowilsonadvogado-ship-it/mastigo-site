@@ -1,8 +1,8 @@
 // Biblioteca de alimentos única: catálogo do diário (desenhado no app.js), tabelas de composição (TACO, IBGE e USDA),
 // medidas caseiras do IBGE e alimentos próprios. São os mesmos dados usados no cálculo do Plano alimentar.
-import { TABELAS, tabelaPorId, baseTabelas, totalTabelas, CAMPOS, PRIORIDADE, buscarMedidas, medidasDe, medidasFonte } from './tabelas.js?v=4ab1eb7';
-import { tacoCategorias } from './taco.js?v=4ab1eb7';
-import { uid, num } from './util-nutri.js?v=4ab1eb7';
+import { TABELAS, tabelaPorId, baseTabelas, totalTabelas, CAMPOS, PRIORIDADE, buscarMedidas, medidasDe, medidasFonte } from './tabelas.js?v=e2cde6a';
+import { tacoCategorias } from './taco.js?v=e2cde6a';
+import { uid, num } from './util-nutri.js?v=e2cde6a';
 
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const COLUNAS = [['kcal', 'kcal', 0], ['ptn', 'Prot. (g)', 1], ['cho', 'Carb. (g)', 1], ['lip', 'Lip. (g)', 1], ['fibra', 'Fibra (g)', 1], ['ca', 'Cálcio (mg)', 0], ['fe', 'Ferro (mg)', 1], ['na', 'Sódio (mg)', 0]];

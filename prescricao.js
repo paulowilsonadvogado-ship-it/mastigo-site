@@ -1,9 +1,9 @@
 // Prescrição dietética e de suplementos em visual law ou no template (papel timbrado) da nutricionista.
 // Requisitos atendidos: identificação do profissional e do paciente, data e assinatura (Res. CFN 304/2003 e 594/2017);
 // para suplementos: nome/composição, dose, posologia, via de administração e duração (Res. CFN 656/2020, alterada pela 731/2022).
-import { foods, icoAlimento } from './data.js?v=4ab1eb7';
-import { uid, num, dataBR, imprimir, lerImagem } from './util-nutri.js?v=4ab1eb7';
-import { idadeEmAnos, idadeTexto, escadaDoComer } from './nutri-ref.js?v=4ab1eb7';
+import { foods, icoAlimento } from './data.js?v=e2cde6a';
+import { uid, num, dataBR, imprimir, lerImagem } from './util-nutri.js?v=e2cde6a';
+import { idadeEmAnos, idadeTexto, escadaDoComer } from './nutri-ref.js?v=e2cde6a';
 
 const emojiRef = n => /caf[eé]/i.test(n) ? '☀️' : /lanche da manh|colação/i.test(n) ? '🍎' : /almo/i.test(n) ? '🍽️' : /lanche/i.test(n) ? '🧃' : /jantar/i.test(n) ? '🌙' : /ceia/i.test(n) ? '⭐' : '🥄';
 const vias = ['Oral', 'Sublingual', 'Enteral (sonda)'];

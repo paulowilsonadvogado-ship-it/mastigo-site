@@ -1,11 +1,11 @@
 // Anamnese nutricional pediátrica com foco em seletividade alimentar.
 // Estrutura baseada em: Res. CFN 594/2017 (prontuário), Res. CFN 304/2003 (prescrição e evolução),
 // abordagem SOS (Toomey & Ross) e critérios de triagem para TARE/ARFID.
-import { foods, icoAlimento } from './data.js?v=4ab1eb7';
-import { uid, dataBR, num, imprimir } from './util-nutri.js?v=4ab1eb7';
-import { idadeEmAnos, idadeTexto, imc, classificaImcIdade, classificaEstaturaIdade, sinaisProblemFeeder, triagemSeletividade } from './nutri-ref.js?v=4ab1eb7';
-import { avaliar, idadeEmDias, graficoCrescimento } from './crescimento.js?v=4ab1eb7';
-import { alergenicos } from './alergenicos.js?v=4ab1eb7';
+import { foods, icoAlimento } from './data.js?v=e2cde6a';
+import { uid, dataBR, num, imprimir } from './util-nutri.js?v=e2cde6a';
+import { idadeEmAnos, idadeTexto, imc, classificaImcIdade, classificaEstaturaIdade, sinaisProblemFeeder, triagemSeletividade } from './nutri-ref.js?v=e2cde6a';
+import { avaliar, idadeEmDias, graficoCrescimento } from './crescimento.js?v=e2cde6a';
+import { alergenicos } from './alergenicos.js?v=e2cde6a';
 
 const diagnosticos = ['TEA (autismo)', 'TDAH', 'Transtorno do processamento sensorial', 'TARE/ARFID (suspeita ou diagnóstico)', 'Alergia à proteína do leite (APLV)', 'Doença do refluxo', 'Constipação intestinal', 'Prematuridade', 'Atraso do desenvolvimento', 'Disfagia / alteração oromotora', 'Anemia', 'Baixo peso', 'Excesso de peso'];
 const terapias = ['Fonoaudiologia', 'Terapia ocupacional / integração sensorial', 'Psicologia', 'ABA', 'Fisioterapia', 'Psicopedagogia', 'Musicoterapia'];
@@ -138,6 +138,13 @@ ${(a.evolucoes || []).length ? `<h2>Evolução nutricional</h2><table>${a.evoluc
     imprimir(html, { titulo: `Anamnese - ${p.name}` });
   }
 
+  function aplicar(form) {
+    const p = paciente(), atual = dados(p.id), novo = coletar(form);
+    Object.assign(atual, novo, { atualizadoEm: new Date().toISOString() });
+    if (novo.nascimento) { const anos = idadeEmAnos(novo.nascimento); if (anos != null) p.age = idadeTexto(anos); p.nascimento = novo.nascimento; }
+    if (novo.sexo) p.sexo = novo.sexo;
+  }
+
   return {
     page,
     evolucaoCard,
@@ -152,12 +159,14 @@ ${(a.evolucoes || []).length ? `<h2>Evolução nutricional</h2><table>${a.evoluc
       return false;
     },
     onInput(e) { if (e.closest?.('#an-form') && ['an-peso', 'an-estatura', 'an-pc', 'an-outrosAceitos'].includes(e.id)) atualizarTriagem(); return false; },
+    // Salvamento automático enquanto a nutricionista digita (antes só salvava no botão "Salvar")
+    autosalvar(form) {
+      if (form.id !== 'an-form' || !paciente()) return false;
+      aplicar(form); ctx.save(); return true;
+    },
     onSubmit(form) {
       if (form.id === 'an-form') {
-        const p = paciente(), atual = dados(p.id), novo = coletar(form);
-        Object.assign(atual, novo, { atualizadoEm: new Date().toISOString() });
-        if (novo.nascimento) { const anos = idadeEmAnos(novo.nascimento); if (anos != null) p.age = idadeTexto(anos); p.nascimento = novo.nascimento; }
-        if (novo.sexo) p.sexo = novo.sexo;
+        aplicar(form);
         ctx.save(); ctx.render(); toast('Anamnese salva no prontuário.'); return true;
       }
       if (form.id === 'an-evolucao') {

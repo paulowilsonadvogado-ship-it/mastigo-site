@@ -4,9 +4,9 @@
 // O token NUNCA vai para o código nem para o repositório: ela cola na tela e ele fica só no navegador
 // dela (nesta aba, ou neste aparelho se ela marcar "lembrar"). Os dados dos clientes ficam só na memória
 // da página, não são gravados.
-import { SITE } from './config-site.js?v=4ab1eb7';
-import { moedaBR } from './assinatura.js?v=4ab1eb7';
-import { baixarCSV } from './util-nutri.js?v=4ab1eb7';
+import { SITE } from './config-site.js?v=e2cde6a';
+import { moedaBR } from './assinatura.js?v=e2cde6a';
+import { baixarCSV } from './util-nutri.js?v=e2cde6a';
 
 const API = 'https://api.mercadopago.com';
 const CHAVE_TOKEN = 'mastigo-mp-token';
