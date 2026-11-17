@@ -24,11 +24,13 @@
   };
   A.entrar = function () { try { sessionStorage.setItem(A.armazenamento, A.chave + '|' + (Date.now() + A.minutosSemUso * 60000)); } catch (e) { /* sem armazenamento */ } };
   A.sair = function () { try { sessionStorage.removeItem(A.armazenamento); localStorage.removeItem(A.armazenamento); } catch (e) { /* sem armazenamento */ } };
-  // Assinante neste aparelho: fez o cadastro e voltou do Mercado Pago (ou está voltando agora)
+  // Assinante neste aparelho: fez o cadastro e voltou do Mercado Pago (ou está voltando agora).
+  // "bloqueada" = a conferência no Mercado Pago (assinatura.js) achou a assinatura cancelada ou pausada.
   A.assinante = function () {
     try {
       var c = JSON.parse(localStorage.getItem('mastigo-conta') || 'null');
-      return !!c && (c.status !== 'aguardando-cartao' || /[?&]assinatura=ok\b/.test(location.search));
+      var volta = /[?&]assinatura=ok\b/.test(location.search);
+      return !!c && (volta || (c.status !== 'bloqueada' && c.status !== 'aguardando-cartao'));
     } catch (e) { return false; }
   };
   function familia() {

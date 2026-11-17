@@ -1,16 +1,16 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js?v=e2cde6a';
-import { createAnamnese } from './anamnese.js?v=e2cde6a';
-import { createPlano } from './plano.js?v=e2cde6a';
-import { createPrescricao } from './prescricao.js?v=e2cde6a';
-import { createPortal } from './portal.js?v=e2cde6a';
-import { createBiblioteca } from './biblioteca.js?v=e2cde6a';
-import { createTrilha, trilhaDemo } from './trilha.js?v=e2cde6a';
-import { createVendas } from './vendas.js?v=e2cde6a';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=e2cde6a';
-import { SITE } from './config-site.js?v=e2cde6a';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR } from './assinatura.js?v=e2cde6a';
-import { formatarTelefone } from './whatsapp.js?v=e2cde6a';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=4616ff7';
+import { createAnamnese } from './anamnese.js?v=4616ff7';
+import { createPlano } from './plano.js?v=4616ff7';
+import { createPrescricao } from './prescricao.js?v=4616ff7';
+import { createPortal } from './portal.js?v=4616ff7';
+import { createBiblioteca } from './biblioteca.js?v=4616ff7';
+import { createTrilha, trilhaDemo } from './trilha.js?v=4616ff7';
+import { createVendas } from './vendas.js?v=4616ff7';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=4616ff7';
+import { SITE } from './config-site.js?v=4616ff7';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=4616ff7';
+import { formatarTelefone } from './whatsapp.js?v=4616ff7';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -108,6 +108,10 @@ export function createModulos(ctx) {
   // Mercado Pago não é verificada aqui; a cobrança e o cancelamento valem pelo que está no Mercado Pago.
   function aoIniciar() {
     const c = lerConta(); if (!c) return;
+    // Confere a assinatura no Mercado Pago (lista publicada pela integração). A dona do site não é conferida.
+    if (!window.MASTIGO_ACESSO?.valido?.() && !new URLSearchParams(location.search).get('assinatura')) {
+      verificarAssinatura(c).then(d => { if (!d.acesso && !window.MASTIGO_ACESSO?.valido?.()) location.replace('./acesso.html?volta=sistema.html'); }).catch(() => {});
+    }
     const p = ctx.state.perfil;
     if (!c.perfilAplicado) {
       if (!p.nome || p.nome === ctx.state.professional) p.nome = c.nome;
@@ -118,7 +122,7 @@ export function createModulos(ctx) {
     }
     const q = new URLSearchParams(location.search), volta = q.get('assinatura');
     if (!volta) return;
-    if (volta === 'ok' && c.status === 'aguardando-cartao') { c.status = 'teste'; c.cartaoEm = new Date().toISOString(); salvarConta(c); }
+    if (volta === 'ok' && ['aguardando-cartao', 'bloqueada'].includes(c.status)) { c.status = 'teste'; c.cartaoEm = new Date().toISOString(); salvarConta(c); }
     q.delete('assinatura');
     history.replaceState(null, '', location.pathname + (q.size ? '?' + q : '') + location.hash);
     ctx.render();
