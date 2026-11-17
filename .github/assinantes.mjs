@@ -30,6 +30,8 @@ function situacao(a, agora = Date.now()) {
 }
 const PESO = { pagante: 6, teste: 5, 'cobranca-pendente': 4, pausada: 3, pendente: 2, cancelada: 1, 'cancelada-no-teste': 1 };
 
+const eu = await api('/users/me').catch(() => null);
+if (eu) console.log(`Conta do token: ${eu.first_name || ''} ${String(eu.last_name || '').slice(0, 1)}. (${eu.site_id || ''}, ${eu.user_type || 'pessoa'})`);
 const planos = [];
 for (const st of ['', 'active', 'inactive', 'cancelled']) {
   const r = await api(`/preapproval_plan/search?limit=100${st ? '&status=' + st : ''}`);
