@@ -30,15 +30,23 @@ function situacao(a, agora = Date.now()) {
 }
 const PESO = { pagante: 6, teste: 5, 'cobranca-pendente': 4, pausada: 3, pendente: 2, cancelada: 1, 'cancelada-no-teste': 1 };
 
-const planos = await api('/preapproval_plan/search?limit=100');
-const plano = (planos.results || []).find(p => p.external_reference === 'MASTIGO-MENSAL') || (planos.results || []).find(p => /mastig/i.test(p.reason || ''));
-if (!plano) throw new Error('Plano "Mastigô mensal" não encontrado nesta conta do Mercado Pago.');
-const lista = [];
+const planos = [];
+for (const st of ['', 'active', 'inactive', 'cancelled']) {
+  const r = await api(`/preapproval_plan/search?limit=100${st ? '&status=' + st : ''}`);
+  for (const p of r.results || []) if (!planos.some(x => x.id === p.id)) planos.push(p);
+}
+console.log(`Planos na conta: ${planos.length} · ${planos.map(p => `"${p.reason}" (${p.status}${p.external_reference ? ', ' + p.external_reference : ''})`).join(' | ') || 'nenhum'}`);
+const plano = planos.find(p => p.external_reference === 'MASTIGO-MENSAL') || planos.find(p => /mastig/i.test(p.reason || ''));
+const todas = [];
 for (let offset = 0; offset < 5000; offset += 100) {
-  const pg = await api(`/preapproval/search?preapproval_plan_id=${encodeURIComponent(plano.id)}&limit=100&offset=${offset}`);
-  lista.push(...(pg.results || []));
+  const pg = await api(`/preapproval/search?limit=100&offset=${offset}`);
+  todas.push(...(pg.results || []));
   if ((pg.results || []).length < 100) break;
 }
+// Assinaturas do plano do Mastigô; se o plano não aparecer na busca, as que citam "Mastigô" no motivo
+const lista = todas.filter(a => plano ? a.preapproval_plan_id === plano.id : /mastig/i.test(a.reason || ''));
+console.log(`Assinaturas na conta: ${todas.length} · do Mastigô: ${lista.length}${plano ? '' : ' (plano não encontrado pela busca)'}`);
+if (!plano && !lista.length && !todas.length) console.log('Nenhuma assinatura ainda. Se o plano foi criado em outra conta do Mercado Pago, o token precisa ser dessa conta.');
 const contas = {}; let semEmail = 0;
 for (const a of lista) {
   const s = situacao(a);

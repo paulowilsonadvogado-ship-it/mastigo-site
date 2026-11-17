@@ -1,11 +1,11 @@
 // Plano alimentar calculado com as tabelas TACO, IBGE (POF 2008-2009) e USDA (estilo WebDiet/Dietbox/Nutrium), com lista de substituições
 // por equivalência energética (método de equivalentes, como nas listas de trocas dos EUA e o
 // "método de troca de alimentos" chinês) e trilha de alimentos-ponte (food chaining) para seletividade.
-import { CAMPOS, baseTaco, acharNasTabelas, baseTabelas, tabelaPorId, PRIORIDADE, FILTROS, rotuloFonte, medidasDe, buscarMedidas, termoMedida, medidaTexto, qtdTexto, medidasFonte } from './tabelas.js?v=4616ff7';
-import { foods, icoAlimento } from './data.js?v=4616ff7';
-import { uid, num, dataBR } from './util-nutri.js?v=4616ff7';
-import { detectarAlergenicos } from './alergenicos.js?v=4616ff7';
-import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=4616ff7';
+import { CAMPOS, baseTaco, acharNasTabelas, baseTabelas, tabelaPorId, PRIORIDADE, FILTROS, rotuloFonte, medidasDe, buscarMedidas, termoMedida, medidaTexto, qtdTexto, medidasFonte } from './tabelas.js?v=11fbb5b';
+import { foods, icoAlimento } from './data.js?v=11fbb5b';
+import { uid, num, dataBR } from './util-nutri.js?v=11fbb5b';
+import { detectarAlergenicos } from './alergenicos.js?v=11fbb5b';
+import { idadeEmAnos, idadeTexto, eerIOM, tmbSchofield, niveisAtividade, metas, amdr, rotulosNutrientes, escadaDoComer } from './nutri-ref.js?v=11fbb5b';
 
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 export { baseTaco }; // compatibilidade: a base unificada (TACO + IBGE + USDA) fica em tabelas.js
