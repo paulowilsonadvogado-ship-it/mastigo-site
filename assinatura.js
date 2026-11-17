@@ -1,6 +1,6 @@
 // Situação da assinatura do profissional (teste de 7 dias → mensal). Nesta versão sem servidor, fica no
 // navegador; quando o servidor estiver no ar, a confirmação vem do Mercado Pago (webhook) e não daqui.
-import { SITE } from './config-site.js?v=11fbb5b';
+import { SITE } from './config-site.js?v=2c89440';
 const CHAVE = 'mastigo-conta';
 const DIA = 86400000;
 export function lerConta() { try { return JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch { return null; } }
@@ -45,7 +45,8 @@ export async function verificarAssinatura(conta = lerConta()) {
   if (!conta || conta.status === 'aguardando-cartao') return { acesso: true, motivo: 'sem-conta' };
   let lista = null;
   try { const r = await fetch('./assinantes.json', { cache: 'no-store' }); if (r.ok) lista = await r.json(); } catch { /* sem internet ou arquivo ainda não criado */ }
-  if (!lista?.contas || !lista.sal) return { acesso: true, motivo: 'sem-lista' };
+  // Sem o plano na conta lida (token de outra conta, plano ainda não achado): não confere, para não bloquear ninguém por engano
+  if (!lista?.contas || !lista.sal || !lista.plano) return { acesso: true, motivo: 'sem-lista' };
   let achado = null;
   for (const e of [conta.emailMp, conta.email].filter(Boolean)) { const k = await codigoEmail(e, lista.sal); if (lista.contas[k]) { achado = lista.contas[k]; break; } }
   const d = decidir(conta, lista, achado);

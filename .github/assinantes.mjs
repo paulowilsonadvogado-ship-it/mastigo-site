@@ -54,7 +54,7 @@ for (const a of lista) {
   const k = codigo(a.payer_email);
   if (!contas[k] || PESO[s] > PESO[contas[k].s]) contas[k] = { s, desde: (a.date_created || '').slice(0, 10) };
 }
-const novo = { sal: SAL, contas: Object.fromEntries(Object.entries(contas).sort()), semEmail };
+const novo = { sal: SAL, plano: !!plano, contas: Object.fromEntries(Object.entries(contas).sort()), semEmail };
 const antigo = existsSync('assinantes.json') ? JSON.parse(readFileSync('assinantes.json', 'utf8')) : null;
 const mudou = !antigo || JSON.stringify({ ...antigo, atualizadoEm: undefined }) !== JSON.stringify(novo);
 if (mudou) writeFileSync('assinantes.json', JSON.stringify({ ...novo, atualizadoEm: new Date().toISOString() }, null, 1) + '\n');
