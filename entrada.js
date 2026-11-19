@@ -80,7 +80,7 @@ form.addEventListener('submit', ev => {
   if (!tel) return falha('Informe o WhatsApp com DDD, por exemplo (48) 99999-0000.', form.whatsapp);
   if (!v.aceite) return falha('Para começar, marque que concorda com as condições da assinatura.', form.aceite);
   erro.textContent = '';
-  const conta = salvarConta(novaConta({ nome, email, whatsapp: tel, crn: String(v.crn || '').trim(), aceiteEm: new Date().toISOString(), aceiteTexto: [...document.querySelectorAll('#condicoes li')].map(li => li.textContent.trim()) }));
+  const conta = salvarConta(novaConta({ nome, email, whatsapp: tel, crn: String(v.crn || '').trim(), aceiteEm: new Date().toISOString(), termosVersao: '2026-11-18', aceiteTexto: [...document.querySelectorAll('#condicoes li')].map(li => li.textContent.trim()) }));
   $('#c-enviar').disabled = true;
   if (SITE.checkoutUrl) {
     $('#c-enviar').textContent = 'Abrindo o Mercado Pago…';
