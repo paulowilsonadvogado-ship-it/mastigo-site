@@ -1,8 +1,8 @@
 // Tela do acesso master do pré-lançamento (ver acesso-guarda.js).
-import { derivarChave } from './acesso-chave.js?v=cf541e0';
-import { iconeAlimento } from './alimentos-icones.js?v=cf541e0';
-import { SITE } from './config-site.js?v=cf541e0';
-import { verificarAssinatura, salvarConta } from './assinatura.js?v=cf541e0';
+import { derivarChave } from './acesso-chave.js?v=cf16114';
+import { iconeAlimento } from './alimentos-icones.js?v=cf16114';
+import { SITE } from './config-site.js?v=cf16114';
+import { verificarAssinatura, salvarConta } from './assinatura.js?v=cf16114';
 
 const $ = s => document.querySelector(s);
 const A = window.MASTIGO_ACESSO || { ativo: false };

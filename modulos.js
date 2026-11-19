@@ -1,16 +1,17 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js?v=cf541e0';
-import { createAnamnese } from './anamnese.js?v=cf541e0';
-import { createPlano } from './plano.js?v=cf541e0';
-import { createPrescricao } from './prescricao.js?v=cf541e0';
-import { createPortal } from './portal.js?v=cf541e0';
-import { createBiblioteca } from './biblioteca.js?v=cf541e0';
-import { createTrilha, trilhaDemo } from './trilha.js?v=cf541e0';
-import { createVendas } from './vendas.js?v=cf541e0';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=cf541e0';
-import { SITE } from './config-site.js?v=cf541e0';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=cf541e0';
-import { formatarTelefone } from './whatsapp.js?v=cf541e0';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=cf16114';
+import { createAnamnese } from './anamnese.js?v=cf16114';
+import { createPlano } from './plano.js?v=cf16114';
+import { createPrescricao } from './prescricao.js?v=cf16114';
+import { createPortal } from './portal.js?v=cf16114';
+import { createBiblioteca } from './biblioteca.js?v=cf16114';
+import { createTrilha, trilhaDemo } from './trilha.js?v=cf16114';
+import { createVendas } from './vendas.js?v=cf16114';
+import { createCopia } from './copia.js?v=cf16114';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=cf16114';
+import { SITE } from './config-site.js?v=cf16114';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=cf16114';
+import { formatarTelefone } from './whatsapp.js?v=cf16114';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -50,10 +51,10 @@ export function createModulos(ctx) {
   // Criança selecionada: uma só para o sistema todo (o app.js liga ao seletor das telas antigas)
   if (!ctx.sel) ctx.sel = { id: null };
   const financeiro = createFinanceiro(ctx), anamnese = createAnamnese(ctx), plano = createPlano(ctx), prescricao = createPrescricao(ctx, plano);
-  const portal = createPortal(ctx, plano), biblioteca = createBiblioteca(ctx), trilha = createTrilha(ctx), vendas = createVendas(ctx);
+  const portal = createPortal(ctx, plano), biblioteca = createBiblioteca(ctx), trilha = createTrilha(ctx), vendas = createVendas(ctx), copia = createCopia(ctx);
   ctx.publicarFamilia = portal.publicar;
   ctx.abrirBiblioteca = aba => biblioteca.abrir(aba);
-  const modulos = [portal, biblioteca, financeiro, anamnese, plano, prescricao, trilha, vendas];
+  const modulos = [portal, biblioteca, financeiro, anamnese, plano, prescricao, trilha, vendas, copia];
   const renderizadores = { financeiro: financeiro.page, anamnese: anamnese.page, trilha: trilha.page, plano: plano.page, prescricao: prescricao.page, familias: portal.page, vendas: vendas.page };
 
   function garantirEstado() {
@@ -197,7 +198,9 @@ export function createModulos(ctx) {
     cartoesConfiguracao,
     seloAssinatura,
     cartaoAssinatura,
-    aoIniciar,
+    cartaoCopia: () => copia.cartao(),
+    // Depois das boas-vindas e da conferência da assinatura, a cópia de segurança do dia
+    aoIniciar: () => { aoIniciar(); copia.aoIniciar(); },
     evolucaoCard: pid => anamnese.evolucaoCard(pid),
     diarioFamilias: pid => portal.diarioFeed(pid),
     pendentesAviso: () => portal.pendentesAviso(),

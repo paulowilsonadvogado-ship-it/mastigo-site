@@ -517,3 +517,12 @@ button.badge{cursor:pointer;font-family:inherit}
 @media(max-width:640px){.busca-linha{flex-direction:column}.busca-linha select{max-width:100%}}
 .itens .qtd{min-width:68px}
 .autosalvo{font-size:12px;color:#00876f;margin:10px 0 0;font-weight:600}
+
+/* Cópia de segurança: aviso diário e cartão em Minha clínica (copia.js) */
+.aviso-copia{position:fixed;right:20px;bottom:20px;z-index:60;max-width:380px;background:#fff;border:1.5px solid #e2d3ff;border-radius:16px;padding:16px 18px;box-shadow:0 14px 40px #2a0a5e33;animation:appear .25s ease}
+.aviso-copia strong{display:block;font-size:14px;color:#2a0a5e;margin-bottom:6px}
+.aviso-copia p{font-size:12px;color:#4d3b6e;line-height:1.6;margin-bottom:12px}
+.aviso-copia-botoes,.cartao-copia-botoes{display:flex;flex-wrap:wrap;gap:8px}
+.cartao-copia-botoes label.button{cursor:pointer}
+.cartao-copia .text-button{margin-top:14px}
+@media (max-width:700px){.aviso-copia{left:12px;right:12px;bottom:12px;max-width:none}}
