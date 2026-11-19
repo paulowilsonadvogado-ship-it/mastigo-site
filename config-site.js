@@ -10,5 +10,11 @@ export const SITE = {
   diasTeste: 7,
   // Dados do fornecedor: o Decreto 7.962/2013 (art. 2º) exige nome/razão social, CPF ou CNPJ,
   // endereço e contato em destaque no site de quem vende pela internet.
-  empresa: { nome: '', documento: '', endereco: '', email: '', whatsapp: '' }
+  empresa: {
+    nome: 'TAINARA DA SILVA MARQUETTE NUTRICAO',
+    documento: 'CNPJ 54.546.283/0001-09',
+    endereco: 'Rua Coronel José Martins Cabral, 1525, Humaitá de Cima, Tubarão/SC, CEP 88708-210',
+    email: 'tainaranutriinfantil@gmail.com',
+    whatsapp: '48996429232'
+  }
 };
