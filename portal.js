@@ -2,11 +2,11 @@
 // as atualizações (novidades, plano/prescrições enviadas, escada do comer, diário e consultas).
 // Na demonstração os dados ficam no navegador. Na versão com servidor, o login usa o provedor de
 // identidade (JWT) e a tabela pipoca.guardians, e o RLS limita os pais à própria criança.
-import { foods, stages, icoAlimento } from './data.js?v=61ed05f';
-import { uid, dataBR, lerImagem } from './util-nutri.js?v=61ed05f';
-import { comportamentos, texturas } from './anamnese.js?v=61ed05f';
-import { idadeEmAnos, idadeTexto, escadaDoComer } from './nutri-ref.js?v=61ed05f';
-import { tiposNovidade, normalizarTelefone, formatarTelefone, mensagemAviso, linkWhatsApp } from './whatsapp.js?v=61ed05f';
+import { foods, stages, icoAlimento } from './data.js?v=8972904';
+import { uid, dataBR, lerImagem } from './util-nutri.js?v=8972904';
+import { comportamentos, texturas } from './anamnese.js?v=8972904';
+import { idadeEmAnos, idadeTexto, escadaDoComer } from './nutri-ref.js?v=8972904';
+import { tiposNovidade, normalizarTelefone, formatarTelefone, mensagemAviso, linkWhatsApp } from './whatsapp.js?v=8972904';
 
 const MAX_TENTATIVAS = 5, BLOQUEIO_MIN = 10;
 

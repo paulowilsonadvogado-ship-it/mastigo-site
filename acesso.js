@@ -1,9 +1,9 @@
 // Tela do acesso master do pré-lançamento (ver acesso-guarda.js).
-import { derivarChave } from './acesso-chave.js?v=61ed05f';
-import { iconeAlimento } from './alimentos-icones.js?v=61ed05f';
-import { SITE } from './config-site.js?v=61ed05f';
-import { verificarAssinatura, salvarConta } from './assinatura.js?v=61ed05f';
-import { entrar as entrarNuvem, baixar, aplicarNoAparelho, enviar, pedirNovaSenha, sessaoLocal } from './nuvem.js?v=61ed05f';
+import { derivarChave } from './acesso-chave.js?v=8972904';
+import { iconeAlimento } from './alimentos-icones.js?v=8972904';
+import { SITE } from './config-site.js?v=8972904';
+import { verificarAssinatura, salvarConta } from './assinatura.js?v=8972904';
+import { entrar as entrarNuvem, baixar, aplicarNoAparelho, enviar, pedirNovaSenha, sessaoLocal } from './nuvem.js?v=8972904';
 
 const $ = s => document.querySelector(s);
 const A = window.MASTIGO_ACESSO || { ativo: false };
@@ -88,6 +88,11 @@ fc.addEventListener('submit', async ev => {
   ev.preventDefault();
   const email = fc.email.value.trim(), s = fc.senha.value;
   if (!email || !s) { clErro.textContent = 'Preencha o e-mail e a senha.'; return; }
+  // Login da dona do site digitado aqui (usuário sem @): passa para o formulário da equipe
+  if (!email.includes('@')) {
+    $('#equipe').open = true; form.usuario.value = email; form.senha.value = s; fc.senha.value = '';
+    form.requestSubmit(); return;
+  }
   clBotao.disabled = true; clBotao.textContent = 'Entrando…'; clErro.textContent = '';
   try {
     await entrarNuvem(email, s);
