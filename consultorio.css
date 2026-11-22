@@ -526,3 +526,4 @@ button.badge{cursor:pointer;font-family:inherit}
 .cartao-copia-botoes label.button{cursor:pointer}
 .cartao-copia .text-button{margin-top:14px}
 @media (max-width:700px){.aviso-copia{left:12px;right:12px;bottom:12px;max-width:none}}
+.nuvem-ok{color:#00876f;font-weight:600;font-size:14px}.nuvem-erro{color:#b0116e;font-weight:600;font-size:14px}

@@ -1,8 +1,9 @@
 // Página de entrada: animação da escada do comer, cadastro do teste e envio ao Mercado Pago.
-import { SITE } from './config-site.js?v=f2aa9ee';
-import { iconeAlimento } from './alimentos-icones.js?v=f2aa9ee';
-import { normalizarTelefone, formatarTelefone } from './whatsapp.js?v=f2aa9ee';
-import { novaConta, salvarConta, lerConta, moedaBR } from './assinatura.js?v=f2aa9ee';
+import { SITE } from './config-site.js?v=61ed05f';
+import { iconeAlimento } from './alimentos-icones.js?v=61ed05f';
+import { normalizarTelefone, formatarTelefone } from './whatsapp.js?v=61ed05f';
+import { novaConta, salvarConta, lerConta, moedaBR } from './assinatura.js?v=61ed05f';
+import { cadastrar, entrar as entrarNuvem, enviar } from './nuvem.js?v=61ed05f';
 
 const $ = s => document.querySelector(s);
 const DIA = 86400000;
@@ -68,7 +69,7 @@ if (!semMovimento) {
 // ===== Cadastro do teste =====
 const form = $('#cadastro'), erro = $('#erro');
 function marcar(campo, invalido) { campo.setAttribute('aria-invalid', invalido ? 'true' : 'false'); }
-form.addEventListener('submit', ev => {
+form.addEventListener('submit', async ev => {
   ev.preventDefault();
   const v = Object.fromEntries(new FormData(form));
   const nome = String(v.nome || '').trim(), email = String(v.email || '').trim().toLowerCase(), tel = normalizarTelefone(v.whatsapp);
@@ -78,10 +79,31 @@ form.addEventListener('submit', ev => {
   if (nome.split(/\s+/).length < 2) return falha('Informe nome e sobrenome.', form.nome);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return falha('Confira o e-mail.', form.email);
   if (!tel) return falha('Informe o WhatsApp com DDD, por exemplo (48) 99999-0000.', form.whatsapp);
+  const senha = String(v.senha || '');
+  marcar(form.senha, senha.length < 8);
+  if (senha.length < 8) return falha('Crie uma senha com pelo menos 8 caracteres.', form.senha);
   if (!v.aceite) return falha('Para começar, marque que concorda com as condições da assinatura.', form.aceite);
   erro.textContent = '';
+  // Conta na nuvem (e-mail + senha): os dados ficam salvos e abrem em qualquer aparelho
+  $('#c-enviar').disabled = true; $('#c-enviar').textContent = 'Criando sua conta…';
+  let nuvem = 'ok';
+  try {
+    const r = await cadastrar(email, senha, nome);
+    if (r.confirmar) nuvem = 'confirmar';
+  } catch (e) {
+    if (/Já existe uma conta/.test(e.message)) {
+      try { await entrarNuvem(email, senha); } catch {
+        $('#c-enviar').disabled = false; $('#c-enviar').textContent = SITE.checkoutUrl ? 'Continuar para cadastrar o cartão' : 'Começar meu teste grátis';
+        return falha('Já existe uma conta com este e-mail. Se for sua, use a mesma senha ou entre em "Entrar".', form.senha);
+      }
+    } else if (/senha/i.test(e.message)) {
+      $('#c-enviar').disabled = false; $('#c-enviar').textContent = SITE.checkoutUrl ? 'Continuar para cadastrar o cartão' : 'Começar meu teste grátis';
+      return falha(e.message, form.senha);
+    } else nuvem = 'depois'; // sem internet ou servidor fora: segue o cadastro e ativa a nuvem depois em Minha clínica
+  }
   const conta = salvarConta(novaConta({ nome, email, whatsapp: tel, crn: String(v.crn || '').trim(), aceiteEm: new Date().toISOString(), termosVersao: '2026-11-18', aceiteTexto: [...document.querySelectorAll('#condicoes li')].map(li => li.textContent.trim()) }));
-  $('#c-enviar').disabled = true;
+  conta.nuvem = nuvem; salvarConta(conta);
+  if (nuvem === 'ok') { try { const local = JSON.parse(localStorage.getItem('pipoca-demo-v1') || 'null'); if (local) await enviar({ ...local, __conta: conta }); } catch { /* sobe na primeira abertura do sistema */ } }
   if (SITE.checkoutUrl) {
     $('#c-enviar').textContent = 'Abrindo o Mercado Pago…';
     location.href = SITE.checkoutUrl;

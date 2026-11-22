@@ -1,17 +1,18 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js?v=f2aa9ee';
-import { createAnamnese } from './anamnese.js?v=f2aa9ee';
-import { createPlano } from './plano.js?v=f2aa9ee';
-import { createPrescricao } from './prescricao.js?v=f2aa9ee';
-import { createPortal } from './portal.js?v=f2aa9ee';
-import { createBiblioteca } from './biblioteca.js?v=f2aa9ee';
-import { createTrilha, trilhaDemo } from './trilha.js?v=f2aa9ee';
-import { createVendas } from './vendas.js?v=f2aa9ee';
-import { createCopia } from './copia.js?v=f2aa9ee';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=f2aa9ee';
-import { SITE } from './config-site.js?v=f2aa9ee';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=f2aa9ee';
-import { formatarTelefone } from './whatsapp.js?v=f2aa9ee';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=61ed05f';
+import * as nuvem from './nuvem.js?v=61ed05f';
+import { createAnamnese } from './anamnese.js?v=61ed05f';
+import { createPlano } from './plano.js?v=61ed05f';
+import { createPrescricao } from './prescricao.js?v=61ed05f';
+import { createPortal } from './portal.js?v=61ed05f';
+import { createBiblioteca } from './biblioteca.js?v=61ed05f';
+import { createTrilha, trilhaDemo } from './trilha.js?v=61ed05f';
+import { createVendas } from './vendas.js?v=61ed05f';
+import { createCopia } from './copia.js?v=61ed05f';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=61ed05f';
+import { SITE } from './config-site.js?v=61ed05f';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=61ed05f';
+import { formatarTelefone } from './whatsapp.js?v=61ed05f';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -103,7 +104,21 @@ export function createModulos(ctx) {
     if (!window.MASTIGO_ACESSO?.ativo || !window.MASTIGO_ACESSO.valido?.()) return '';
     return `<section class="card"><h2>Acesso master</h2><p>Você entrou com o login da dona do site. A senha é pedida a cada entrada: em cada aba nova e depois de 30 minutos sem uso.</p><button class="button" data-action="sair-master">Sair do acesso master</button></section>`;
   }
-  const cartaoAssinatura = () => cartaoPlano() + cartaoAcessoMaster();
+  // Salvamento na nuvem (nuvem.js): situação e ativação para quem ainda não tem senha
+  function cartaoNuvem() {
+    const s = nuvem.sessaoLocal(), c = lerConta(), e = ctx.esc;
+    if (s) {
+      const st = nuvem.status, hora = st.quando ? new Date(st.quando).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+      const linha = st.estado === 'erro' ? `<p class="nuvem-erro">Não foi possível salvar na nuvem agora (${e(st.erro)}). Seus dados estão guardados neste aparelho e sobem sozinhos quando a internet voltar.</p>`
+        : `<p class="nuvem-ok" id="nuvem-status">${st.estado === 'salvando' ? 'Salvando na nuvem…' : `Tudo salvo na nuvem${hora ? ' · ' + hora : ''}.`}</p>`;
+      return `<section class="card"><h2>Seus dados na nuvem</h2><p>Conta <b>${e(s.email || '')}</b>. Tudo o que você faz é salvo sozinho num servidor seguro em São Paulo, com uma cópia por dia dos últimos 30 dias. Entre com o mesmo e-mail e senha em qualquer computador ou celular.</p>${linha}<button class="button" data-action="nuvem-sair">Sair da conta neste aparelho</button></section>`;
+    }
+    if (window.MASTIGO_ACESSO?.valido?.() && !c) return '';
+    return `<section class="card"><h2>Salve seus dados na nuvem</h2><p>Hoje seus dados estão só neste navegador. Crie uma senha para guardar tudo num servidor seguro e abrir de qualquer aparelho.</p>
+<form id="nuvem-form" class="form-grid"><div class="field"><label for="nv-email">E-mail</label><input id="nv-email" name="email" type="email" required value="${e(c?.email || '')}" autocomplete="email"></div><div class="field"><label for="nv-senha">Senha (mínimo 8 caracteres)</label><input id="nv-senha" name="senha" type="password" minlength="8" required autocomplete="new-password"></div><p class="helper" id="nv-erro" role="alert"></p><div class="form-footer"><span>Já tem conta? Use a mesma senha.</span><button class="button primary" type="submit">Ativar a nuvem</button></div></form></section>`;
+  }
+  nuvem.aoMudarStatus(st => { const el = document.getElementById('nuvem-status'); if (el && st.estado !== 'erro') el.textContent = st.estado === 'salvando' ? 'Salvando na nuvem…' : `Tudo salvo na nuvem · ${new Date(st.quando || Date.now()).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}.`; });
+  const cartaoAssinatura = () => cartaoNuvem() + cartaoPlano() + cartaoAcessoMaster();
   // Volta do cadastro (?assinatura=teste) ou do Mercado Pago (?assinatura=ok): ativa o teste,
   // preenche os dados profissionais com o cadastro e dá as boas-vindas. Sem servidor, a volta do
   // Mercado Pago não é verificada aqui; a cobrança e o cancelamento valem pelo que está no Mercado Pago.
@@ -132,7 +147,7 @@ export function createModulos(ctx) {
     ctx.modal(`Boas-vindas, ${nome}!`, `<p>Seu teste grátis vai até <b>${dataBR(ultimoDiaTeste(c))}</b>. ${SITE.checkoutUrl ? `A primeira cobrança de ${moedaBR(SITE.preco)} será em ${dataBR(c.fimTeste)}, e você pode cancelar antes no Mercado Pago.` : 'Nada será cobrado sem você cadastrar o cartão.'}</p>
 <p>Comece cadastrando a primeira criança em <b>Pacientes</b>. Depois vêm a anamnese, a trilha alimentar, o plano, a prescrição e a Área da Família para os pais.</p>
 <p>Seus dados profissionais (nome, e-mail, WhatsApp e CRN) já foram preenchidos em <b>Minha clínica</b>.</p>
-<div class="form-footer"><span>Dados salvos neste navegador</span><button class="button primary" data-action="close">Começar a explorar</button></div>`);
+<div class="form-footer"><span>${nuvem.sessaoLocal() ? 'Tudo salvo na nuvem, automaticamente' : 'Dados salvos neste navegador'}</span><button class="button primary" data-action="close">Começar a explorar</button></div>`);
   }
 
   // Cartões extras em "Minha clínica": dados profissionais (recibos, prescrições, prontuário)
@@ -213,6 +228,11 @@ export function createModulos(ctx) {
       portal.publicar(a.patient, { tipo: 'consulta', titulo: 'Consulta agendada', texto: `${a.type} · ${d} às ${a.time}` });
     },
     onClick(el) {
+      if (el.dataset.action === 'nuvem-sair') {
+        ctx.modal('Sair da conta neste aparelho?', `<p>Seus dados continuam salvos na nuvem. Este aparelho deixa de salvar lá até você entrar de novo.</p><div class="form-footer"><span></span><button class="button primary" data-action="nuvem-sair-ok">Sair</button></div>`);
+        return true;
+      }
+      if (el.dataset.action === 'nuvem-sair-ok') { nuvem.salvarJa().finally(() => { nuvem.sair(); location.replace('./acesso.html?volta=sistema.html'); }); return true; }
       if (el.dataset.action === 'sair-master') {
         window.MASTIGO_ACESSO?.sair?.();
         location.replace('./acesso.html?volta=sistema.html');
@@ -231,6 +251,20 @@ export function createModulos(ctx) {
       return modulos.some(m => m.onChange?.(e));
     },
     onSubmit(form, values) {
+      if (form.id === 'nuvem-form') {
+        const erro = form.querySelector('#nv-erro'), btn = form.querySelector('button[type=submit]');
+        btn.disabled = true; btn.textContent = 'Ativando…'; erro.textContent = '';
+        (async () => {
+          try {
+            try { const r = await nuvem.cadastrar(values.email, values.senha, ctx.state.perfil?.nome || ''); if (r.confirmar) throw new Error('Enviamos um link para o seu e-mail: confirme e depois entre com o e-mail e a senha.'); }
+            catch (e) { if (/Já existe uma conta/.test(e.message)) await nuvem.entrar(values.email, values.senha); else throw e; }
+            const remoto = await nuvem.baixar();
+            if (remoto?.dados && (remoto.dados.patients?.length || 0) > (ctx.state.patients?.length || 0)) { nuvem.aplicarNoAparelho(remoto.dados); location.reload(); return; }
+            ctx.save(); await nuvem.salvarJa(); ctx.render(); ctx.toast('Nuvem ativada. Seus dados estão salvos.');
+          } catch (e) { btn.disabled = false; btn.textContent = 'Ativar a nuvem'; erro.textContent = e.message; }
+        })();
+        return true;
+      }
       if (form.id === 'perfil-form') { aplicarPerfil(values); ctx.save(); ctx.render(); ctx.toast('Dados salvos.'); return true; }
       if (form.id === 'wa-config-form') {
         ctx.state.whatsapp = { modo: 'manual', perguntar: !!values.perguntar };

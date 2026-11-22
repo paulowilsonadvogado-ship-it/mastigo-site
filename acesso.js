@@ -1,8 +1,9 @@
 // Tela do acesso master do pré-lançamento (ver acesso-guarda.js).
-import { derivarChave } from './acesso-chave.js?v=f2aa9ee';
-import { iconeAlimento } from './alimentos-icones.js?v=f2aa9ee';
-import { SITE } from './config-site.js?v=f2aa9ee';
-import { verificarAssinatura, salvarConta } from './assinatura.js?v=f2aa9ee';
+import { derivarChave } from './acesso-chave.js?v=61ed05f';
+import { iconeAlimento } from './alimentos-icones.js?v=61ed05f';
+import { SITE } from './config-site.js?v=61ed05f';
+import { verificarAssinatura, salvarConta } from './assinatura.js?v=61ed05f';
+import { entrar as entrarNuvem, baixar, aplicarNoAparelho, enviar, pedirNovaSenha, sessaoLocal } from './nuvem.js?v=61ed05f';
 
 const $ = s => document.querySelector(s);
 const A = window.MASTIGO_ACESSO || { ativo: false };
@@ -73,4 +74,42 @@ form.addEventListener('submit', ev => {
     erro.textContent = 'Usuário ou senha incorretos. Confira e tente de novo.';
     senha.select();
   }, 40);
+});
+
+// ---------- Login das clientes (nuvem) ----------
+document.querySelectorAll('[data-ver]').forEach(b => b.addEventListener('click', () => {
+  const campo = document.getElementById(b.dataset.ver), mostrar = campo.type === 'password';
+  campo.type = mostrar ? 'text' : 'password'; b.textContent = mostrar ? 'Ocultar' : 'Mostrar'; b.setAttribute('aria-pressed', String(mostrar));
+}));
+const fc = $('#cliente'), clErro = $('#cl-erro'), clBotao = $('#cl-entrar');
+if (conta?.email) $('#cl-email').value = conta.email;
+if (sessaoLocal()) { $('#cl-email').value = sessaoLocal().email || $('#cl-email').value; }
+fc.addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const email = fc.email.value.trim(), s = fc.senha.value;
+  if (!email || !s) { clErro.textContent = 'Preencha o e-mail e a senha.'; return; }
+  clBotao.disabled = true; clBotao.textContent = 'Entrando…'; clErro.textContent = '';
+  try {
+    await entrarNuvem(email, s);
+    clBotao.textContent = 'Trazendo seus dados…';
+    const remoto = await baixar();
+    if (Array.isArray(remoto?.dados?.patients) || remoto?.dados?.__conta) aplicarNoAparelho(remoto.dados);
+    else {
+      // Primeira vez na nuvem: leva o que já está neste aparelho
+      let local = null; try { local = JSON.parse(localStorage.getItem('pipoca-demo-v1') || 'null'); } catch { /* */ }
+      if (local) await enviar({ ...local, __conta: conta || null });
+    }
+    let c = null; try { c = JSON.parse(localStorage.getItem('mastigo-conta') || 'null'); } catch { /* */ }
+    if (!c) { c = { nome: '', email, criadoEm: new Date().toISOString(), status: 'teste', cartaoEm: new Date().toISOString() }; salvarConta(c); }
+    location.replace('./sistema.html');
+  } catch (e) {
+    clBotao.disabled = false; clBotao.textContent = 'Entrar';
+    clErro.textContent = e.message || 'Não foi possível entrar agora. Confira a internet e tente de novo.';
+  }
+});
+$('#cl-esqueci').addEventListener('click', async () => {
+  const email = fc.email.value.trim();
+  if (!email) { clErro.textContent = 'Digite o seu e-mail acima e toque de novo em "Esqueci a senha".'; fc.email.focus(); return; }
+  try { await pedirNovaSenha(email); clErro.textContent = 'Se houver conta com esse e-mail, enviamos um link para criar uma senha nova.'; }
+  catch (e) { clErro.textContent = e.message; }
 });

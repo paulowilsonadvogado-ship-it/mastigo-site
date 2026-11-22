@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./entrada.css?v=f2aa9ee">
-  <script src="./acesso-guarda.js?v=f2aa9ee"></script>
+  <link rel="stylesheet" href="./entrada.css?v=61ed05f">
+  <script src="./acesso-guarda.js?v=61ed05f"></script>
   <style>
     body{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--leite)}
     .bastidor{background:var(--noite);color:var(--lavanda);padding:48px 56px;display:flex;flex-direction:column;position:relative;overflow:hidden}
@@ -43,6 +43,8 @@
     .clientes b{display:block;font-family:var(--display);font-size:18px;color:var(--noite);margin-bottom:4px}
     .clientes p{font-size:14.5px;color:var(--tinta);margin:0 0 12px}
     .clientes .botao{width:100%}
+    .equipe{margin-top:26px;border-top:1px solid var(--linha);padding-top:14px}.equipe summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--tinta)}.equipe form{margin-top:14px}
+    .link-simples{background:none;border:0;padding:0;color:#5b1fc0;font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}
     .email-mp{display:grid;gap:8px;margin:0 0 12px}.email-mp label{font-size:13px;font-weight:600;color:var(--noite)}.email-mp input{padding:12px 14px;border:1.5px solid var(--linha);border-radius:12px;font:inherit;font-size:16px}.email-mp .erro{margin:0;min-height:0}
     @media(max-width:860px){
       body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
@@ -72,8 +74,18 @@
   <main class="porta">
     <div class="cartao-acesso">
     <div class="clientes" id="clientes" hidden></div>
-    <form id="acesso" novalidate>
+    <form id="cliente" novalidate>
       <h2>Entrar</h2>
+      <p>Use o e-mail e a senha que você criou no cadastro. Seus dados ficam salvos na nuvem e abrem em qualquer computador ou celular.</p>
+      <div class="campo"><label for="cl-email">E-mail</label><input id="cl-email" name="email" type="email" autocomplete="email" autocapitalize="none" required maxlength="120"></div>
+      <div class="campo"><label for="cl-senha">Senha</label><div class="senha"><input id="cl-senha" name="senha" type="password" autocomplete="current-password" required maxlength="120"><button type="button" class="ver" data-ver="cl-senha" aria-controls="cl-senha" aria-pressed="false">Mostrar</button></div></div>
+      <p class="erro" id="cl-erro" role="alert"></p>
+      <button class="botao botao-roxo largo" id="cl-entrar" type="submit">Entrar</button>
+      <p class="rodape-acesso"><button type="button" class="link-simples" id="cl-esqueci">Esqueci a senha</button></p>
+    </form>
+    <details class="equipe" id="equipe">
+    <summary>Acesso da equipe</summary>
+    <form id="acesso" novalidate>
       <p>Login da dona do site.</p>
       <div class="campo"><label for="a-usuario">Usuário</label><input id="a-usuario" name="usuario" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required maxlength="80"></div>
       <div class="campo"><label for="a-senha">Senha</label><div class="senha"><input id="a-senha" name="senha" type="password" autocomplete="current-password" required maxlength="120"><button type="button" class="ver" id="ver-senha" aria-controls="a-senha" aria-pressed="false">Mostrar</button></div></div>
@@ -81,9 +93,10 @@
       <button class="botao botao-roxo largo" id="entrar" type="submit">Entrar</button>
       <p class="rodape-acesso">A senha é pedida a cada entrada: em cada aba nova e sempre que o site ficar 30 minutos sem uso.</p>
     </form>
+    </details>
     <p class="rodape-acesso cadastro-link" id="cadastro-link">Ainda não é cliente? <a href="./index.html#comecar">Faça o cadastro e use 7 dias grátis</a>.</p>
     </div>
   </main>
-  <script type="module" src="./acesso.js?v=f2aa9ee"></script>
+  <script type="module" src="./acesso.js?v=61ed05f"></script>
 </body>
 </html>

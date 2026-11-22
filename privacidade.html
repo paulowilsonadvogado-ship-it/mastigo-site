@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./entrada.css?v=f2aa9ee">
+  <link rel="stylesheet" href="./entrada.css?v=61ed05f">
   <style>
     .documento{max-width:760px;margin:0 auto;padding:40px 22px 64px}
     .documento h1{font-size:clamp(30px,4vw,40px);margin-bottom:6px}
@@ -41,14 +41,14 @@
   </header>
   <main id="conteudo" class="documento">
     <h1>Política de Privacidade</h1>
-    <p class="atualizado">Última atualização: 18 de novembro de 2026</p>
+    <p class="atualizado">Última atualização: 22 de novembro de 2026</p>
     <p>Esta Política explica, de acordo com a Lei Geral de Proteção de Dados (Lei 13.709/2018, LGPD), quais dados pessoais o <b>Mastigô</b> trata, para quê, com quem compartilha e como você exerce seus direitos.</p>
     <div class="quadro"><p><b>Fornecedor:</b> TAINARA DA SILVA MARQUETTE NUTRICAO, CNPJ 54.546.283/0001-09, com sede na Rua Coronel José Martins Cabral, 1525, Humaitá de Cima, Tubarão/SC, CEP 88708-210. <b>Atendimento:</b> tainaranutriinfantil@gmail.com · WhatsApp (48) 99642-9232.</p></div>
     <p><b>Controlador dos dados</b> dos visitantes e assinantes: o fornecedor acima. <b>Encarregado(a) pelo tratamento de dados:</b> TAINARA DA SILVA MARQUETTE, pelo e-mail tainaranutriinfantil@gmail.com.</p>
 
     <h2>1. Resumo</h2>
     <ul>
-      <li>Nesta fase, os dados que o profissional registra no sistema, inclusive os dos pacientes, ficam <b>somente no navegador do aparelho</b> dele. O Mastigô não recebe esses dados.</li>
+      <li>Nesta fase, os dados que o profissional registra no sistema, inclusive os dos pacientes, ficam no navegador do aparelho dele e, quando ele cria a senha de acesso, também numa <b>cópia na nuvem</b> (Supabase, servidores em São Paulo), acessível só com o e-mail e a senha dele.</li>
       <li>Os dados do cartão são tratados pelo <b>Mercado Pago</b>. O Mastigô não recebe o número do cartão.</li>
       <li>Não vendemos dados pessoais e não usamos cookies de publicidade.</li>
     </ul>
@@ -58,9 +58,9 @@
       <thead><tr><th>De quem</th><th>Quais dados</th><th>Onde ficam</th></tr></thead>
       <tbody>
         <tr><td>Visitantes do site</td><td>Endereço IP e dados técnicos do navegador, recebidos pelos serviços de hospedagem (GitHub Pages) e de fontes (Google Fonts) ao carregar a página.</td><td>Nesses provedores, conforme as políticas deles.</td></tr>
-        <tr><td>Profissional, no cadastro do teste</td><td>Nome, e-mail, WhatsApp, CRN (opcional) e o registro do aceite destes termos.</td><td>No navegador do aparelho do profissional.</td></tr>
+        <tr><td>Profissional, no cadastro do teste</td><td>Nome, e-mail, WhatsApp, CRN (opcional), o registro do aceite destes termos e a senha de acesso (guardada pelo provedor apenas em forma cifrada, sem possibilidade de leitura).</td><td>No navegador do aparelho do profissional e na nuvem (Supabase, São Paulo).</td></tr>
         <tr><td>Profissional, na assinatura</td><td>Nome, e-mail, CPF/CNPJ e dados do cartão informados no Mercado Pago. Do Mercado Pago, recebemos o e-mail do pagador, a situação da assinatura, valores e datas das cobranças.</td><td>No Mercado Pago e na conta do fornecedor no Mercado Pago.</td></tr>
-        <tr><td>Pacientes e familiares (registrados pelo profissional)</td><td>Dados de identificação e de saúde de crianças e de seus responsáveis: anamnese, medidas, alimentação, planos, prescrições, fotos e mensagens da área da família.</td><td>Somente no navegador do aparelho em que o sistema é usado.</td></tr>
+        <tr><td>Pacientes e familiares (registrados pelo profissional)</td><td>Dados de identificação e de saúde de crianças e de seus responsáveis: anamnese, medidas, alimentação, planos, prescrições, fotos e mensagens da área da família.</td><td>No navegador do aparelho em que o sistema é usado e, com a conta na nuvem ativa, no banco de dados do Supabase (São Paulo), com acesso restrito à conta do profissional e cópias diárias dos últimos 30 dias.</td></tr>
       </tbody>
     </table>
 
@@ -81,6 +81,7 @@
     <h2>6. Com quem compartilhamos</h2>
     <ul>
       <li><b>Mercado Pago</b>: processamento dos pagamentos e gestão das assinaturas.</li>
+      <li><b>Supabase</b> (servidores da AWS em São Paulo): login do profissional e guarda dos dados registrados no sistema, para que não se percam e abram em outros aparelhos.</li>
       <li><b>GitHub</b> (hospedagem do site) e <b>Google Fonts</b> (fontes do site): recebem dados técnicos de acesso, como o endereço IP.</li>
       <li><b>WhatsApp</b>: quando o profissional usa o botão de aviso à família, o sistema abre o WhatsApp com uma mensagem pronta, sem dados de saúde. O envio é feito pelo próprio profissional.</li>
       <li><b>Contador e autoridades</b>, quando necessário para cumprir obrigações legais ou ordens judiciais.</li>
@@ -107,7 +108,7 @@
     <p>O Mastigô é contratado e usado por profissionais adultos. Dados de crianças só entram no sistema registrados pelo profissional ou, na área da família, pelos pais ou responsáveis, sempre no melhor interesse da criança.</p>
 
     <h2>12. Alterações desta Política</h2>
-    <p>Esta Política pode ser atualizada, especialmente quando a sincronização entre aparelhos for lançada. A versão em vigor fica sempre nesta página, com a data da última atualização, e mudanças relevantes serão avisadas com antecedência.</p>
+    <p>Esta Política pode ser atualizada, especialmente quando novos recursos forem lançados. A versão em vigor fica sempre nesta página, com a data da última atualização, e mudanças relevantes serão avisadas com antecedência.</p>
 
   </main>
   <footer class="rodape">

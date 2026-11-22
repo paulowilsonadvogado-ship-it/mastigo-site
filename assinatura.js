@@ -1,10 +1,10 @@
 // Situação da assinatura do profissional (teste de 7 dias → mensal). Nesta versão sem servidor, fica no
 // navegador; quando o servidor estiver no ar, a confirmação vem do Mercado Pago (webhook) e não daqui.
-import { SITE } from './config-site.js?v=f2aa9ee';
+import { SITE } from './config-site.js?v=61ed05f';
 const CHAVE = 'mastigo-conta';
 const DIA = 86400000;
 export function lerConta() { try { return JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch { return null; } }
-export function salvarConta(c) { try { localStorage.setItem(CHAVE, JSON.stringify(c)); } catch { /* navegador sem armazenamento */ } return c; }
+export function salvarConta(c) { try { localStorage.setItem(CHAVE, JSON.stringify(c)); globalThis.MASTIGO_NUVEM?.agendar?.(); } catch { /* navegador sem armazenamento */ } return c; }
 export function novaConta(dados, agora = new Date()) {
   return { ...dados, criadoEm: agora.toISOString(), inicioTeste: agora.toISOString(), fimTeste: new Date(agora.getTime() + SITE.diasTeste * DIA).toISOString(), status: SITE.checkoutUrl ? 'aguardando-cartao' : 'teste' };
 }

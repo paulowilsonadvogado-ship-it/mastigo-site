@@ -2,9 +2,9 @@
 // com o motivo de cada escolha à mostra, e a escada de conquistas da criança.
 // Base clínica: food chaining (Fraker et al., 2007: mudar uma característica por vez a partir do que já é
 // aceito) e abordagem SOS (Toomey & Ross: exposição sem pressão, passos antes de comer).
-import { foods, icoAlimento } from './data.js?v=f2aa9ee';
-import { uid, dataBR } from './util-nutri.js?v=f2aa9ee';
-import { GRUPOS, CORES, SABORES, TEXTURAS, normalizar, classificar, parecenca, diferencas, ROTULO_DIM } from './trilha-dados.js?v=f2aa9ee';
+import { foods, icoAlimento } from './data.js?v=61ed05f';
+import { uid, dataBR } from './util-nutri.js?v=61ed05f';
+import { GRUPOS, CORES, SABORES, TEXTURAS, normalizar, classificar, parecenca, diferencas, ROTULO_DIM } from './trilha-dados.js?v=61ed05f';
 
 export const LISTAS = [
   ['frequente', 'Come com frequência', 'Está no prato quase todo dia. Toque no alimento para marcar rigidez (só de um jeito) ou mudar de lista.'],
