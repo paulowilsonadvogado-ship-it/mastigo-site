@@ -1,17 +1,17 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js?v=cf16114';
-import { createAnamnese } from './anamnese.js?v=cf16114';
-import { createPlano } from './plano.js?v=cf16114';
-import { createPrescricao } from './prescricao.js?v=cf16114';
-import { createPortal } from './portal.js?v=cf16114';
-import { createBiblioteca } from './biblioteca.js?v=cf16114';
-import { createTrilha, trilhaDemo } from './trilha.js?v=cf16114';
-import { createVendas } from './vendas.js?v=cf16114';
-import { createCopia } from './copia.js?v=cf16114';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=cf16114';
-import { SITE } from './config-site.js?v=cf16114';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=cf16114';
-import { formatarTelefone } from './whatsapp.js?v=cf16114';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=f2aa9ee';
+import { createAnamnese } from './anamnese.js?v=f2aa9ee';
+import { createPlano } from './plano.js?v=f2aa9ee';
+import { createPrescricao } from './prescricao.js?v=f2aa9ee';
+import { createPortal } from './portal.js?v=f2aa9ee';
+import { createBiblioteca } from './biblioteca.js?v=f2aa9ee';
+import { createTrilha, trilhaDemo } from './trilha.js?v=f2aa9ee';
+import { createVendas } from './vendas.js?v=f2aa9ee';
+import { createCopia } from './copia.js?v=f2aa9ee';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=f2aa9ee';
+import { SITE } from './config-site.js?v=f2aa9ee';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=f2aa9ee';
+import { formatarTelefone } from './whatsapp.js?v=f2aa9ee';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 

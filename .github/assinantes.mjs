@@ -9,8 +9,17 @@ const SAL = 'mastigo-assinantes-v1';
 const DIAS_TESTE = 7;
 if (!TOKEN) { console.error('Falta o segredo MP_ACCESS_TOKEN (Settings › Secrets and variables › Actions).'); process.exit(1); }
 
+// Quando o Mercado Pago pede para esperar (429, limite de consultas) ou fica fora do ar (5xx), tenta de novo
+// até 4 vezes; se continuar, encerra sem erro e a próxima conferência tenta outra vez (sem e-mail de falha).
+const espera = ms => new Promise(r => setTimeout(r, ms));
 async function api(caminho) {
-  const r = await fetch('https://api.mercadopago.com' + caminho, { headers: { Authorization: `Bearer ${TOKEN}` } });
+  let r;
+  for (let t = 0; t < 5; t++) {
+    r = await fetch('https://api.mercadopago.com' + caminho, { headers: { Authorization: `Bearer ${TOKEN}` } });
+    if (r.status !== 429 && r.status < 500) break;
+    if (t === 4) { console.log(`Mercado Pago ocupado (${r.status}). A lista atual foi mantida; nova tentativa na próxima conferência.`); process.exit(0); }
+    await espera(Number(r.headers.get('retry-after')) * 1000 || 5000 * 2 ** t);
+  }
   if (r.status === 401 || r.status === 403) throw new Error('O Mercado Pago recusou o token (confira se é o Access Token de produção, APP_USR-).');
   if (!r.ok) throw new Error(`Mercado Pago respondeu ${r.status} em ${caminho.split('?')[0]}.`);
   return r.json();
@@ -33,7 +42,7 @@ const PESO = { pagante: 6, teste: 5, 'cobranca-pendente': 4, pausada: 3, pendent
 const eu = await api('/users/me').catch(() => null);
 if (eu) console.log(`Conta do token: ${eu.first_name || ''} ${String(eu.last_name || '').slice(0, 1)}. (${eu.site_id || ''}, ${eu.user_type || 'pessoa'})`);
 const planos = [];
-for (const st of ['', 'active', 'inactive', 'cancelled']) {
+for (const st of ['']) { // uma consulta só: a busca já traz os planos em todas as situações
   const r = await api(`/preapproval_plan/search?limit=100${st ? '&status=' + st : ''}`);
   for (const p of r.results || []) if (!planos.some(x => x.id === p.id)) planos.push(p);
 }
