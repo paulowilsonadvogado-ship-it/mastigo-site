@@ -1,9 +1,9 @@
 // Tela do acesso master do pré-lançamento (ver acesso-guarda.js).
-import { derivarChave } from './acesso-chave.js?v=1fe293c';
-import { iconeAlimento } from './alimentos-icones.js?v=1fe293c';
-import { SITE } from './config-site.js?v=1fe293c';
-import { verificarAssinatura, salvarConta } from './assinatura.js?v=1fe293c';
-import { entrar as entrarNuvem, baixar, aplicarNoAparelho, enviar, pedirNovaSenha, sessaoLocal } from './nuvem.js?v=1fe293c';
+import { derivarChave, sha256 } from './acesso-chave.js?v=21022aa';
+import { iconeAlimento } from './alimentos-icones.js?v=21022aa';
+import { SITE } from './config-site.js?v=21022aa';
+import { verificarAssinatura, salvarConta } from './assinatura.js?v=21022aa';
+import { entrarComoDona, entrar as entrarNuvem, baixar, aplicarNoAparelho, enviar, pedirNovaSenha, sessaoLocal } from './nuvem.js?v=21022aa';
 
 const $ = s => document.querySelector(s);
 const A = window.MASTIGO_ACESSO || { ativo: false };
@@ -67,7 +67,9 @@ form.addEventListener('submit', ev => {
     if (ok) {
       A.sair(); A.entrar();
       botao.textContent = 'Entrando…';
-      location.replace(destino());
+      const hexDe = t => [...sha256(new TextEncoder().encode(t))].map(b => b.toString(16).padStart(2, '0')).join('');
+      const dona = entrarComoDona(usuario, s, hexDe).catch(() => null);
+      Promise.race([dona, new Promise(r => setTimeout(r, 8000))]).finally(() => location.replace(destino()));
       return;
     }
     botao.disabled = false; botao.textContent = 'Entrar';

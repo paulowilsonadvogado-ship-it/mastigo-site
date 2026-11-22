@@ -1,9 +1,9 @@
 // Página de entrada: animação da escada do comer, cadastro do teste e envio ao Mercado Pago.
-import { SITE } from './config-site.js?v=1fe293c';
-import { iconeAlimento } from './alimentos-icones.js?v=1fe293c';
-import { normalizarTelefone, formatarTelefone } from './whatsapp.js?v=1fe293c';
-import { novaConta, salvarConta, lerConta, moedaBR } from './assinatura.js?v=1fe293c';
-import { cadastrar, entrar as entrarNuvem, enviar } from './nuvem.js?v=1fe293c';
+import { SITE } from './config-site.js?v=21022aa';
+import { iconeAlimento } from './alimentos-icones.js?v=21022aa';
+import { normalizarTelefone, formatarTelefone } from './whatsapp.js?v=21022aa';
+import { novaConta, salvarConta, lerConta, moedaBR } from './assinatura.js?v=21022aa';
+import { cadastrar, entrar as entrarNuvem, enviar } from './nuvem.js?v=21022aa';
 
 const $ = s => document.querySelector(s);
 const DIA = 86400000;

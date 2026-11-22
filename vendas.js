@@ -3,10 +3,10 @@
 // que tem o token em segredo, grava o relatório no Supabase (tabela relatorio_vendas). Aqui a dona entra
 // com a conta dela na nuvem e lê; só contas marcadas em public.donos conseguem ler
 // (database/supabase_002_vendas.sql). Nenhum token é pedido nem guardado no navegador.
-import { SITE } from './config-site.js?v=1fe293c';
-import { moedaBR } from './assinatura.js?v=1fe293c';
-import { baixarCSV } from './util-nutri.js?v=1fe293c';
-import * as nuvem from './nuvem.js?v=1fe293c';
+import { SITE } from './config-site.js?v=21022aa';
+import { moedaBR } from './assinatura.js?v=21022aa';
+import { baixarCSV } from './util-nutri.js?v=21022aa';
+import * as nuvem from './nuvem.js?v=21022aa';
 
 const CHAVE_TOKEN = 'mastigo-mp-token'; // token antigo, só para apagar de navegadores que o guardaram
 const MP = {
@@ -59,10 +59,10 @@ export function createVendas(ctx) {
   const dataBR = iso => iso ? new Date(iso).toLocaleDateString('pt-BR') : '–';
   let semDono = false, tentou = false;
   async function carregar() {
-    if (!nuvem.sessaoLocal()) return;
+    if (!nuvem.sessaoLocal(nuvem.SESSAO_DONA)) return;
     carregando = true; erro = ''; tentou = true; ctx.render();
     try {
-      const [rel, donos] = await Promise.all([nuvem.lerTabela('relatorio_vendas', 'select=dados,atualizado_em&id=eq.1'), nuvem.lerTabela('donos', 'select=user_id')]);
+      const [rel, donos] = await Promise.all([nuvem.lerTabela('relatorio_vendas', 'select=dados,atualizado_em&id=eq.1', nuvem.SESSAO_DONA), nuvem.lerTabela('donos', 'select=user_id', nuvem.SESSAO_DONA)]);
       semDono = !donos?.length;
       const linha = rel?.[0];
       dados = linha ? { lista: linha.dados.lista || [], plano: linha.dados.plano || 'Mastigô mensal', em: new Date(linha.dados.em || linha.atualizado_em) } : null;
@@ -75,8 +75,8 @@ export function createVendas(ctx) {
 
   function relatorio() {
     if (carregando) return '<div class="card vd-rel"><p class="vd-carregando">Buscando o relatório…</p></div>';
-    if (semDono) return `<div class="card vd-rel"><div class="vd-erro">A conta <b>${esc(nuvem.sessaoLocal()?.email || '')}</b> ainda não está liberada para ver as vendas. Peça para liberar esta conta como dona do Mastigô (feito uma vez, no Supabase).</div><div class="vd-acoes"><button class="button" data-action="vd-atualizar">Conferir de novo</button><button class="button" data-action="vd-desconectar">Entrar com outra conta</button></div></div>`;
-    if (erro) return `<div class="card vd-rel"><div class="vd-erro">${esc(erro)}</div><div class="vd-acoes"><button class="button" data-action="vd-atualizar">Tentar de novo</button><button class="button" data-action="vd-desconectar">Entrar com outra conta</button></div></div>`;
+    if (semDono) return `<div class="card vd-rel"><div class="vd-erro">O seu login master já está ligado à nuvem, mas ainda falta <b>liberar</b> esta conta para ver as vendas (feito uma vez, no Supabase). Avise quem cuida do sistema.</div><div class="vd-acoes"><button class="button" data-action="vd-atualizar">Conferir de novo</button><button class="button" data-action="vd-desconectar">Ligar de novo</button></div></div>`;
+    if (erro) return `<div class="card vd-rel"><div class="vd-erro">${esc(erro)}</div><div class="vd-acoes"><button class="button" data-action="vd-atualizar">Tentar de novo</button><button class="button" data-action="vd-desconectar">Ligar de novo</button></div></div>`;
     if (!dados) return '';
     const r = resumoVendas(dados.lista);
     const lista = [...dados.lista].sort((a, b) => String(b.date_created || '').localeCompare(String(a.date_created || '')));
@@ -101,21 +101,18 @@ ${lista.map(a => { const s = situacaoAssinatura(a), sit = SITUACOES[s]; return `
   }
 
   function conectar() {
-    return `<section class="card vd-conectar"><h2>Entrar para ver o relatório</h2>
-<p>O relatório de vendas fica guardado na nuvem do Mastigô e só abre para a conta da dona. Entre com o e-mail e a senha da sua conta na nuvem (na primeira vez, escolha uma senha: a conta é criada agora).</p>
-<form id="vd-login" class="vd-token"><label for="vd-email">E-mail</label><input id="vd-email" name="email" type="email" autocomplete="email" required>
-<label for="vd-senha">Senha (mínimo 8 caracteres)</label><input id="vd-senha" name="senha" type="password" minlength="8" autocomplete="current-password" required>
-<p class="helper" id="vd-login-erro" role="alert"></p>
-<button class="button primary" type="submit">Entrar e ver o relatório</button></form>
-<div class="vd-nota">O token do Mercado Pago <b>não</b> é pedido aqui: ele fica guardado em segredo na conferência automática, e o navegador nunca o recebe.</div></section>`;
+    return `<section class="card vd-conectar"><h2>Falta ligar o relatório ao seu login</h2>
+<p>O relatório abre sozinho para quem entra com o <b>login master</b>. Para ligar, saia e entre de novo com o seu usuário e senha master (botão abaixo). Não precisa de e-mail.</p>
+<button class="button primary" data-action="vd-reentrar">Sair e entrar de novo</button>
+<div class="vd-nota">O token do Mercado Pago não é pedido aqui: ele fica guardado em segredo na conferência automática, e o navegador nunca o recebe.</div></section>`;
   }
 
   function page() {
     if (!ehMaster()) return heading('Vendas do Mastigô', 'Esta aba é só da dona do site.') + '<div class="card empty">Entre pelo "Entrar" da página inicial com o login da dona do site.</div>';
-    if (nuvem.sessaoLocal() && !tentou && !carregando) setTimeout(carregar, 0);
+    if (nuvem.sessaoLocal(nuvem.SESSAO_DONA) && !tentou && !carregando) setTimeout(carregar, 0);
     const site = 'https://mastigô.com';
     return heading('Vendas do Mastigô', 'Quantas pessoas estão usando, quantas estão no teste, quantas compraram e quanto entrou.') + `
-${nuvem.sessaoLocal() ? relatorio() : conectar()}
+${nuvem.sessaoLocal(nuvem.SESSAO_DONA) ? relatorio() : conectar()}
 <div class="vendas">
 <section class="card vd-plano"><span class="vd-etiqueta">Plano à venda</span><h2>Mastigô mensal</h2>
 <p class="vd-preco">${moedaBR(SITE.preco)} <small>por mês, depois de ${SITE.diasTeste} dias grátis</small></p>
@@ -134,8 +131,9 @@ ${nuvem.sessaoLocal() ? relatorio() : conectar()}
     onClick(el) {
       const d = el.dataset;
       if (d.vdCopiar) { (navigator.clipboard?.writeText(d.vdCopiar) || Promise.reject()).then(() => ctx.toast('Link copiado.'), () => ctx.toast(`Copie: ${d.vdCopiar}`)); return true; }
+      if (d.action === 'vd-reentrar') { window.MASTIGO_ACESSO?.sair?.(); location.replace('./acesso.html?volta=sistema.html%23vendas'); return true; }
       if (d.action === 'vd-atualizar') { erro = ''; carregar(); return true; }
-      if (d.action === 'vd-desconectar') { try { sessionStorage.removeItem(CHAVE_TOKEN); localStorage.removeItem(CHAVE_TOKEN); } catch { /* */ } nuvem.sair(); dados = null; erro = ''; semDono = false; tentou = false; ctx.render(); ctx.toast('Saiu da conta da nuvem neste navegador.'); return true; }
+      if (d.action === 'vd-desconectar') { try { sessionStorage.removeItem(CHAVE_TOKEN); localStorage.removeItem(CHAVE_TOKEN); } catch { /* */ } nuvem.sair(nuvem.SESSAO_DONA); dados = null; erro = ''; semDono = false; tentou = false; ctx.render(); ctx.toast('Saiu da conta da nuvem neste navegador.'); return true; }
       if (d.action === 'vd-csv' && dados) {
         baixarCSV(`mastigo-assinaturas-${new Date().toLocaleDateString('sv-SE')}.csv`, [['Cliente', 'Situação', 'Assinou em', 'Próxima cobrança', 'Cobranças', 'Recebido (R$)'],
           ...dados.lista.map(a => [[a.payer_first_name, a.payer_last_name].filter(Boolean).join(' ') || a.payer_email || a.payer_id || '', SITUACOES[situacaoAssinatura(a)].nome, dataBR(a.date_created), dataBR(a.next_payment_date), Number(a.summarized?.charged_quantity) || 0, (Number(a.summarized?.charged_amount) || 0).toFixed(2).replace('.', ',')])]);
@@ -149,8 +147,8 @@ ${nuvem.sessaoLocal() ? relatorio() : conectar()}
       btn.disabled = true; msg.textContent = '';
       (async () => {
         try {
-          try { await nuvem.entrar(v.email, v.senha); }
-          catch (e) { if (!/incorretos/.test(e.message)) throw e; const r = await nuvem.cadastrar(v.email, v.senha, ''); if (r.confirmar) throw new Error('Confirme o e-mail pelo link enviado e entre de novo.'); }
+          try { await nuvem.entrar(v.email, v.senha, nuvem.SESSAO_DONA); }
+          catch (e) { if (!/incorretos/.test(e.message)) throw e; const r = await nuvem.cadastrar(v.email, v.senha, '', nuvem.SESSAO_DONA); if (r.confirmar) throw new Error('Confirme o e-mail pelo link enviado e entre de novo.'); }
           tentou = false; dados = null; erro = ''; await carregar();
         } catch (e) { btn.disabled = false; msg.textContent = e.message; }
       })();

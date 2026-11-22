@@ -8,6 +8,7 @@ export const NUVEM = {
   url: 'https://hvgqauqieonuzjwabmpu.supabase.co',
   chave: 'sb_publishable_pZ_q8o_18PnJfG1f5tqdhQ_6yjcOySe'
 };
+export const SESSAO_DONA = 'mastigo-sessao-dona';
 const SESSAO = 'mastigo-sessao', ESTADO = 'pipoca-demo-v1', CONTA = 'mastigo-conta';
 
 const ler = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } };
@@ -35,34 +36,43 @@ function traduzir(d, status) {
 }
 
 // ---------- Conta (login) ----------
-function guardarSessao(s) {
+function guardarSessao(s, chave = SESSAO) {
   if (!s?.access_token) return null;
   const sessao = { access_token: s.access_token, refresh_token: s.refresh_token, expira: Date.now() + (Number(s.expires_in) || 3600) * 1000, id: s.user?.id, email: s.user?.email };
-  gravar(SESSAO, sessao); return sessao;
+  gravar(chave, sessao); return sessao;
 }
-export const sessaoLocal = () => ler(SESSAO);
-export async function sessao() {
-  const s = ler(SESSAO); if (!s?.refresh_token) return null;
+export const sessaoLocal = (chave = SESSAO) => ler(chave);
+export async function sessao(chave = SESSAO) {
+  const s = ler(chave); if (!s?.refresh_token) return null;
   if (s.expira - Date.now() > 60_000) return s;
-  try { return guardarSessao(await pedir('/auth/v1/token?grant_type=refresh_token', { metodo: 'POST', corpo: { refresh_token: s.refresh_token } })); }
-  catch (e) { if (e.status === 400 || e.status === 401) gravar(SESSAO, null); return null; }
+  try { return guardarSessao(await pedir('/auth/v1/token?grant_type=refresh_token', { metodo: 'POST', corpo: { refresh_token: s.refresh_token } }), chave); }
+  catch (e) { if (e.status === 400 || e.status === 401) gravar(chave, null); return null; }
 }
-export async function entrar(email, senha) {
-  return guardarSessao(await pedir('/auth/v1/token?grant_type=password', { metodo: 'POST', corpo: { email: String(email).trim().toLowerCase(), password: senha } }));
+export async function entrar(email, senha, chave = SESSAO) {
+  return guardarSessao(await pedir('/auth/v1/token?grant_type=password', { metodo: 'POST', corpo: { email: String(email).trim().toLowerCase(), password: senha } }), chave);
 }
 // Cria a conta. Se o projeto exigir confirmação de e-mail, volta sem sessão (confirmar = true).
-export async function cadastrar(email, senha, nome = '') {
+export async function cadastrar(email, senha, nome = '', chave = SESSAO) {
   const r = await pedir('/auth/v1/signup', { metodo: 'POST', corpo: { email: String(email).trim().toLowerCase(), password: senha, data: { nome } } });
-  const s = guardarSessao(r?.session || (r?.access_token ? r : null));
+  const s = guardarSessao(r?.session || (r?.access_token ? r : null), chave);
   return { sessao: s, confirmar: !s };
 }
-export async function sair() {
-  const s = ler(SESSAO);
+export async function sair(chave = SESSAO) {
+  const s = ler(chave);
   if (s?.access_token) pedir('/auth/v1/logout', { metodo: 'POST', token: s.access_token }).catch(() => {});
-  gravar(SESSAO, null);
+  gravar(chave, null);
 }
 export async function pedirNovaSenha(email) {
   await pedir('/auth/v1/recover', { metodo: 'POST', corpo: { email: String(email).trim().toLowerCase() }, cabecalhos: { } });
+}
+
+// Conta da dona na nuvem, ligada ao login master: e-mail e senha saem do usuário e da senha master
+// (resumo SHA-256), sem nada legível no código. Usada só para ler o relatório de vendas.
+export async function entrarComoDona(usuario, senhaMaster, sha256hex) {
+  const email = `dona-${sha256hex('mastigo-dona|' + String(usuario).trim().toLowerCase()).slice(0, 16)}@xn--mastig-nxa.com`;
+  const senha = sha256hex(`mastigo-dona-senha|${String(usuario).trim().toLowerCase()}|${senhaMaster}`);
+  try { return await entrar(email, senha, SESSAO_DONA); }
+  catch (e) { if (!/incorretos/.test(e.message)) throw e; return (await cadastrar(email, senha, 'Dona do Mastigô', SESSAO_DONA)).sessao; }
 }
 
 // ---------- Dados ----------
@@ -77,8 +87,8 @@ export async function enviar(dados) {
   return true;
 }
 // Leitura de outras tabelas com a sessão da conta (ex.: relatorio_vendas, só para a dona)
-export async function lerTabela(tabela, consulta = 'select=*') {
-  const s = await sessao(); if (!s) return null;
+export async function lerTabela(tabela, consulta = 'select=*', chave = SESSAO) {
+  const s = await sessao(chave); if (!s) return null;
   return pedir(`/rest/v1/${tabela}?${consulta}`, { token: s.access_token });
 }
 // O que vai para a nuvem: o estado do sistema + a conta da assinatura (para entrar em outro aparelho)
