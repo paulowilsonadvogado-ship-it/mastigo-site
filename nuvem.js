@@ -76,6 +76,11 @@ export async function enviar(dados) {
   await pedir('/rest/v1/estados?on_conflict=user_id', { metodo: 'POST', token: s.access_token, corpo: { user_id: s.id, dados }, cabecalhos: { Prefer: 'resolution=merge-duplicates,return=minimal' } });
   return true;
 }
+// Leitura de outras tabelas com a sessão da conta (ex.: relatorio_vendas, só para a dona)
+export async function lerTabela(tabela, consulta = 'select=*') {
+  const s = await sessao(); if (!s) return null;
+  return pedir(`/rest/v1/${tabela}?${consulta}`, { token: s.access_token });
+}
 // O que vai para a nuvem: o estado do sistema + a conta da assinatura (para entrar em outro aparelho)
 function pacote() {
   const estado = ler(ESTADO); if (!estado) return null;
@@ -133,7 +138,9 @@ export async function sincronizarAoAbrir() {
   } catch (e) { avisar('erro', { erro: e.message || 'Sem conexão' }); }
   return false;
 }
-addEventListener('pagehide', () => { if (timer) enviarAgora(); });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) enviarAgora(); });
-addEventListener('online', () => agendar(200));
-if (typeof window !== 'undefined') window.MASTIGO_NUVEM = { agendar, salvarJa, status, sessaoLocal };
+if (typeof window !== 'undefined') {
+  addEventListener('pagehide', () => { if (timer) enviarAgora(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) enviarAgora(); });
+  addEventListener('online', () => agendar(200));
+  window.MASTIGO_NUVEM = { agendar, salvarJa, status, sessaoLocal };
+}

@@ -71,3 +71,23 @@ const mudou = !antigo || JSON.stringify({ ...antigo, atualizadoEm: undefined }) 
 if (mudou) writeFileSync('assinantes.json', JSON.stringify({ ...novo, atualizadoEm: new Date().toISOString() }, null, 1) + '\n');
 const cont = {}; for (const a of lista) { const s = situacao(a); cont[s] = (cont[s] || 0) + 1; }
 console.log(`Assinaturas lidas: ${lista.length} · ${JSON.stringify(cont)} · sem e-mail: ${semEmail} · arquivo ${mudou ? 'atualizado' : 'sem mudança'}.`);
+
+// Relatório da aba "Vendas do Mastigô": grava no Supabase (tabela relatorio_vendas, que só a conta da dona lê).
+// O navegador não pode consultar o Mercado Pago direto (o Mercado Pago bloqueia), por isso o relatório sai daqui.
+const SUPA_URL = process.env.SUPABASE_URL || 'https://hvgqauqieonuzjwabmpu.supabase.co';
+const SUPA_SECRET = process.env.SUPABASE_SECRET;
+if (SUPA_SECRET) {
+  const enxuta = a => ({
+    status: a.status, date_created: a.date_created, next_payment_date: a.next_payment_date,
+    payer_id: a.payer_id, payer_email: a.payer_email, payer_first_name: a.payer_first_name, payer_last_name: a.payer_last_name,
+    summarized: { charged_quantity: a.summarized?.charged_quantity || 0, charged_amount: a.summarized?.charged_amount || 0 },
+    auto_recurring: { start_date: a.auto_recurring?.start_date }
+  });
+  const dados = { plano: plano?.reason || 'Mastigô mensal', em: new Date().toISOString(), lista: lista.map(enxuta) };
+  const r = await fetch(`${SUPA_URL}/rest/v1/relatorio_vendas?on_conflict=id`, {
+    method: 'POST',
+    headers: { apikey: SUPA_SECRET, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ id: 1, dados, atualizado_em: dados.em })
+  });
+  console.log(r.ok ? 'Relatório de vendas enviado ao Supabase.' : `Supabase recusou o relatório (${r.status}): ${(await r.text()).slice(0, 200)}`);
+} else console.log('Sem o segredo SUPABASE_SECRET: o relatório da aba Vendas não foi enviado.');

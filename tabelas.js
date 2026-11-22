@@ -1,10 +1,10 @@
 // Tabelas de composição usadas no Plano alimentar e na Biblioteca: TACO, IBGE (POF 2008-2009) e USDA,
 // mais a Tabela de Medidas Referidas do IBGE (medidas caseiras em gramas).
 // A TBCA (USP) não entra: a licença dela (CC BY-NC-ND 4.0) proíbe uso comercial sem autorização da USP/FoRC.
-import { tacoDados, tacoCategorias, tacoCampos, tacoFonte } from './taco.js?v=8972904';
-import { ibgeDados, ibgeCategorias, ibgeFonte } from './ibge.js?v=8972904';
-import { usdaDados, usdaCategorias, usdaFonte } from './usda.js?v=8972904';
-import { medidasIbge, medidasNomes, medidasFonte } from './medidas-ibge.js?v=8972904';
+import { tacoDados, tacoCategorias, tacoCampos, tacoFonte } from './taco.js?v=1fe293c';
+import { ibgeDados, ibgeCategorias, ibgeFonte } from './ibge.js?v=1fe293c';
+import { usdaDados, usdaCategorias, usdaFonte } from './usda.js?v=1fe293c';
+import { medidasIbge, medidasNomes, medidasFonte } from './medidas-ibge.js?v=1fe293c';
 
 export const CAMPOS = tacoCampos; // kcal, ptn, lip, cho, fibra, ca, fe, zn, na, k, vitA, vitC, mg
 const nutrientes = (r, ini) => Object.fromEntries(CAMPOS.map((c, i) => [c, r[ini + i]]));

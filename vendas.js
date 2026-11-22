@@ -1,15 +1,14 @@
-// Vendas do Mastigô: aba só do login da dona do site (Tainara). Busca as assinaturas do plano
-// "Mastigô mensal" direto na API do Mercado Pago, com o Access Token da conta dela, e monta o relatório:
-// quem está usando, em teste, pagando, quem cancelou e quanto entrou.
-// O token NUNCA vai para o código nem para o repositório: ela cola na tela e ele fica só no navegador
-// dela (nesta aba, ou neste aparelho se ela marcar "lembrar"). Os dados dos clientes ficam só na memória
-// da página, não são gravados.
-import { SITE } from './config-site.js?v=8972904';
-import { moedaBR } from './assinatura.js?v=8972904';
-import { baixarCSV } from './util-nutri.js?v=8972904';
+// Vendas do Mastigô: aba só do login da dona do site (Tainara). O Mercado Pago não deixa o navegador
+// consultar a API direto (bloqueio de CORS: "Failed to fetch"), então o robô do GitHub (assinantes.mjs),
+// que tem o token em segredo, grava o relatório no Supabase (tabela relatorio_vendas). Aqui a dona entra
+// com a conta dela na nuvem e lê; só contas marcadas em public.donos conseguem ler
+// (database/supabase_002_vendas.sql). Nenhum token é pedido nem guardado no navegador.
+import { SITE } from './config-site.js?v=1fe293c';
+import { moedaBR } from './assinatura.js?v=1fe293c';
+import { baixarCSV } from './util-nutri.js?v=1fe293c';
+import * as nuvem from './nuvem.js?v=1fe293c';
 
-const API = 'https://api.mercadopago.com';
-const CHAVE_TOKEN = 'mastigo-mp-token';
+const CHAVE_TOKEN = 'mastigo-mp-token'; // token antigo, só para apagar de navegadores que o guardaram
 const MP = {
   assinantes: 'https://www.mercadopago.com.br/subscription-plans/plans',
   recebimentos: 'https://www.mercadopago.com.br/activities',
@@ -57,43 +56,27 @@ export function resumoVendas(lista, preco = SITE.preco, agora = Date.now()) {
 export function createVendas(ctx) {
   const { esc, icon, heading } = ctx;
   let dados = null, carregando = false, erro = '';
-  const lerToken = () => { try { return sessionStorage.getItem(CHAVE_TOKEN) || localStorage.getItem(CHAVE_TOKEN) || ''; } catch { return ''; } };
   const dataBR = iso => iso ? new Date(iso).toLocaleDateString('pt-BR') : '–';
-
-  async function api(caminho, token) {
-    const r = await fetch(API + caminho, { headers: { Authorization: `Bearer ${token}` } });
-    if (r.status === 401 || r.status === 403) throw new Error('O Mercado Pago recusou o token. Confira se é o Access Token de produção (começa com APP_USR-) da conta da Tainara.');
-    if (!r.ok) throw new Error(`O Mercado Pago respondeu com erro ${r.status}. Tente de novo em instantes.`);
-    return r.json();
-  }
+  let semDono = false, tentou = false;
   async function carregar() {
-    const token = lerToken(); if (!token) return;
-    carregando = true; erro = ''; ctx.render();
+    if (!nuvem.sessaoLocal()) return;
+    carregando = true; erro = ''; tentou = true; ctx.render();
     try {
-      // Acha o plano "Mastigô mensal" (código MASTIGO-MENSAL) e depois as assinaturas dele
-      const planos = await api('/preapproval_plan/search?limit=100', token);
-      const plano = (planos.results || []).find(p => p.external_reference === 'MASTIGO-MENSAL') || (planos.results || []).find(p => /mastig/i.test(p.reason || ''));
-      const lista = [];
-      for (let offset = 0; offset < 2000; offset += 100) {
-        const q = plano ? `preapproval_plan_id=${encodeURIComponent(plano.id)}&` : '';
-        const pg = await api(`/preapproval/search?${q}limit=100&offset=${offset}`, token);
-        const res = (pg.results || []).filter(a => plano || /mastig/i.test(a.reason || ''));
-        lista.push(...res);
-        if ((pg.results || []).length < 100 || offset + 100 >= (pg.paging?.total || 0)) break;
-      }
-      dados = { lista, plano: plano?.reason || 'Mastigô mensal', em: new Date() };
-    } catch (e) {
-      erro = e.message || 'Não foi possível falar com o Mercado Pago.';
-    }
+      const [rel, donos] = await Promise.all([nuvem.lerTabela('relatorio_vendas', 'select=dados,atualizado_em&id=eq.1'), nuvem.lerTabela('donos', 'select=user_id')]);
+      semDono = !donos?.length;
+      const linha = rel?.[0];
+      dados = linha ? { lista: linha.dados.lista || [], plano: linha.dados.plano || 'Mastigô mensal', em: new Date(linha.dados.em || linha.atualizado_em) } : null;
+      if (!semDono && !linha) erro = 'O relatório ainda não chegou. Ele é montado pela conferência automática do Mercado Pago (algumas vezes por dia); volte mais tarde.';
+    } catch (e) { erro = e.message || 'Não foi possível buscar o relatório.'; }
     carregando = false; ctx.render();
   }
-
   const cartao = (rotulo, valor, detalhe, cor) => `<div class="vd-num" style="--cor:${cor}"><span>${rotulo}</span><b>${valor}</b>${detalhe ? `<small>${detalhe}</small>` : ''}</div>`;
   const cliente = a => esc([a.payer_first_name, a.payer_last_name].filter(Boolean).join(' ') || a.payer_email || (a.payer_id ? `Cliente ${a.payer_id}` : 'Cliente'));
 
   function relatorio() {
-    if (carregando) return '<div class="card vd-rel"><p class="vd-carregando">Buscando as assinaturas no Mercado Pago…</p></div>';
-    if (erro) return `<div class="card vd-rel"><div class="vd-erro">${esc(erro)}</div><div class="vd-acoes"><button class="button" data-action="vd-atualizar">Tentar de novo</button><button class="button" data-action="vd-desconectar">Trocar o token</button></div></div>`;
+    if (carregando) return '<div class="card vd-rel"><p class="vd-carregando">Buscando o relatório…</p></div>';
+    if (semDono) return `<div class="card vd-rel"><div class="vd-erro">A conta <b>${esc(nuvem.sessaoLocal()?.email || '')}</b> ainda não está liberada para ver as vendas. Peça para liberar esta conta como dona do Mastigô (feito uma vez, no Supabase).</div><div class="vd-acoes"><button class="button" data-action="vd-atualizar">Conferir de novo</button><button class="button" data-action="vd-desconectar">Entrar com outra conta</button></div></div>`;
+    if (erro) return `<div class="card vd-rel"><div class="vd-erro">${esc(erro)}</div><div class="vd-acoes"><button class="button" data-action="vd-atualizar">Tentar de novo</button><button class="button" data-action="vd-desconectar">Entrar com outra conta</button></div></div>`;
     if (!dados) return '';
     const r = resumoVendas(dados.lista);
     const lista = [...dados.lista].sort((a, b) => String(b.date_created || '').localeCompare(String(a.date_created || '')));
@@ -118,23 +101,21 @@ ${lista.map(a => { const s = situacaoAssinatura(a), sit = SITUACOES[s]; return `
   }
 
   function conectar() {
-    return `<section class="card vd-conectar"><h2>Conectar o relatório ao Mercado Pago</h2>
-<p>Para os números aparecerem aqui, o Mastigô precisa ler as assinaturas na conta do Mercado Pago da Tainara. Isso é feito uma vez, por ela:</p>
-<ol><li>Abra <a href="${MP.credenciais}" target="_blank" rel="noopener">Mercado Pago Developers › Suas integrações</a>, já logada na conta da Tainara.</li>
-<li>Crie uma aplicação (nome: Mastigô; produto: Assinaturas) e abra <b>Credenciais de produção</b>.</li>
-<li>Copie o <b>Access Token</b> (começa com APP_USR-) e cole abaixo.</li></ol>
-<form id="vd-token-form" class="vd-token"><label for="vd-token">Access Token de produção</label><input id="vd-token" name="token" type="password" autocomplete="off" spellcheck="false" placeholder="APP_USR-..." required>
-<label class="check"><input type="checkbox" name="lembrar"> Lembrar neste aparelho (só no computador ou celular da Tainara)</label>
-<button class="button primary" type="submit">Conectar e ver o relatório</button></form>
-<div class="vd-nota"><b>Cuidado com esse token.</b> Ele dá acesso à conta do Mercado Pago. Fica guardado só neste navegador e nunca vai para o código do site. Não envie para ninguém; se desconfiar que vazou, gere um novo em Credenciais.</div></section>`;
+    return `<section class="card vd-conectar"><h2>Entrar para ver o relatório</h2>
+<p>O relatório de vendas fica guardado na nuvem do Mastigô e só abre para a conta da dona. Entre com o e-mail e a senha da sua conta na nuvem (na primeira vez, escolha uma senha: a conta é criada agora).</p>
+<form id="vd-login" class="vd-token"><label for="vd-email">E-mail</label><input id="vd-email" name="email" type="email" autocomplete="email" required>
+<label for="vd-senha">Senha (mínimo 8 caracteres)</label><input id="vd-senha" name="senha" type="password" minlength="8" autocomplete="current-password" required>
+<p class="helper" id="vd-login-erro" role="alert"></p>
+<button class="button primary" type="submit">Entrar e ver o relatório</button></form>
+<div class="vd-nota">O token do Mercado Pago <b>não</b> é pedido aqui: ele fica guardado em segredo na conferência automática, e o navegador nunca o recebe.</div></section>`;
   }
 
   function page() {
     if (!ehMaster()) return heading('Vendas do Mastigô', 'Esta aba é só da dona do site.') + '<div class="card empty">Entre pelo "Entrar" da página inicial com o login da dona do site.</div>';
-    if (lerToken() && !dados && !carregando && !erro) setTimeout(carregar, 0);
+    if (nuvem.sessaoLocal() && !tentou && !carregando) setTimeout(carregar, 0);
     const site = 'https://mastigô.com';
     return heading('Vendas do Mastigô', 'Quantas pessoas estão usando, quantas estão no teste, quantas compraram e quanto entrou.') + `
-${lerToken() ? relatorio() : conectar()}
+${nuvem.sessaoLocal() ? relatorio() : conectar()}
 <div class="vendas">
 <section class="card vd-plano"><span class="vd-etiqueta">Plano à venda</span><h2>Mastigô mensal</h2>
 <p class="vd-preco">${moedaBR(SITE.preco)} <small>por mês, depois de ${SITE.diasTeste} dias grátis</small></p>
@@ -154,7 +135,7 @@ ${lerToken() ? relatorio() : conectar()}
       const d = el.dataset;
       if (d.vdCopiar) { (navigator.clipboard?.writeText(d.vdCopiar) || Promise.reject()).then(() => ctx.toast('Link copiado.'), () => ctx.toast(`Copie: ${d.vdCopiar}`)); return true; }
       if (d.action === 'vd-atualizar') { erro = ''; carregar(); return true; }
-      if (d.action === 'vd-desconectar') { try { sessionStorage.removeItem(CHAVE_TOKEN); localStorage.removeItem(CHAVE_TOKEN); } catch { /* sem armazenamento */ } dados = null; erro = ''; ctx.render(); ctx.toast('Relatório desconectado deste navegador.'); return true; }
+      if (d.action === 'vd-desconectar') { try { sessionStorage.removeItem(CHAVE_TOKEN); localStorage.removeItem(CHAVE_TOKEN); } catch { /* */ } nuvem.sair(); dados = null; erro = ''; semDono = false; tentou = false; ctx.render(); ctx.toast('Saiu da conta da nuvem neste navegador.'); return true; }
       if (d.action === 'vd-csv' && dados) {
         baixarCSV(`mastigo-assinaturas-${new Date().toLocaleDateString('sv-SE')}.csv`, [['Cliente', 'Situação', 'Assinou em', 'Próxima cobrança', 'Cobranças', 'Recebido (R$)'],
           ...dados.lista.map(a => [[a.payer_first_name, a.payer_last_name].filter(Boolean).join(' ') || a.payer_email || a.payer_id || '', SITUACOES[situacaoAssinatura(a)].nome, dataBR(a.date_created), dataBR(a.next_payment_date), Number(a.summarized?.charged_quantity) || 0, (Number(a.summarized?.charged_amount) || 0).toFixed(2).replace('.', ',')])]);
@@ -163,11 +144,17 @@ ${lerToken() ? relatorio() : conectar()}
       return false;
     },
     onSubmit(form, v) {
-      if (form.id !== 'vd-token-form') return false;
-      const token = String(v.token || '').trim();
-      if (!/^APP_USR-[\w-]{20,}$/.test(token)) { ctx.toast('Isso não parece um Access Token de produção (começa com APP_USR-).'); return true; }
-      try { (v.lembrar ? localStorage : sessionStorage).setItem(CHAVE_TOKEN, token); } catch { ctx.toast('O navegador não deixou guardar o token.'); return true; }
-      dados = null; erro = ''; carregar(); return true;
+      if (form.id !== 'vd-login') return false;
+      const msg = form.querySelector('#vd-login-erro'), btn = form.querySelector('button[type=submit]');
+      btn.disabled = true; msg.textContent = '';
+      (async () => {
+        try {
+          try { await nuvem.entrar(v.email, v.senha); }
+          catch (e) { if (!/incorretos/.test(e.message)) throw e; const r = await nuvem.cadastrar(v.email, v.senha, ''); if (r.confirmar) throw new Error('Confirme o e-mail pelo link enviado e entre de novo.'); }
+          tentou = false; dados = null; erro = ''; await carregar();
+        } catch (e) { btn.disabled = false; msg.textContent = e.message; }
+      })();
+      return true;
     }
   };
 }

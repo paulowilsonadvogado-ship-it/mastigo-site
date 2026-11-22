@@ -1,7 +1,8 @@
 # Integração com o Mercado Pago: a cada 15 minutos lê as assinaturas do plano "Mastigô mensal" e publica
 # assinantes.json (só códigos embaralhados dos e-mails e a situação, nunca nome ou e-mail) para o site
 # liberar ou bloquear o acesso. O Access Token fica no segredo MP_ACCESS_TOKEN deste repositório
-# (Settings › Secrets and variables › Actions) e nunca aparece no código nem nos registros.
+# (Settings › Secrets and variables › Actions) e nunca aparece no código nem nos registros. O relatório da aba
+# Vendas vai para o Supabase com o segredo SUPABASE_SECRET (chave secreta do projeto mastigo).
 # Este arquivo vem de pipoca-pro/scripts/site-github; não edite aqui.
 name: Assinaturas do Mercado Pago
 on:
@@ -24,6 +25,7 @@ jobs:
       - name: Ler assinaturas no Mercado Pago
         env:
           MP_ACCESS_TOKEN: ${{ secrets.MP_ACCESS_TOKEN }}
+          SUPABASE_SECRET: ${{ secrets.SUPABASE_SECRET }}
         run: node .github/assinantes.mjs
       - name: Publicar se mudou
         run: |
