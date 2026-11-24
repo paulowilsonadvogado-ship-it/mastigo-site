@@ -1,0 +1,23 @@
+{
+  "name": "Mastigô · Terapia alimentar infantil",
+  "short_name": "Mastigô",
+  "description": "Sistema para nutricionistas que atendem crianças com seletividade alimentar: anamnese, trilha alimentar, plano, prescrição e área da família.",
+  "id": "./sistema.html",
+  "start_url": "./sistema.html?origem=app",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "background_color": "#ffffff",
+  "theme_color": "#7b2ff7",
+  "categories": ["health", "medical", "productivity"],
+  "icons": [
+    { "src": "./icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Área da família", "short_name": "Família", "url": "./sistema.html#entrar", "icons": [{ "src": "./icone-192.png", "sizes": "192x192" }] }
+  ]
+}

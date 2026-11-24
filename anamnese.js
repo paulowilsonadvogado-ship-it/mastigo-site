@@ -1,11 +1,11 @@
 // Anamnese nutricional pediátrica com foco em seletividade alimentar.
 // Estrutura baseada em: Res. CFN 594/2017 (prontuário), Res. CFN 304/2003 (prescrição e evolução),
 // abordagem SOS (Toomey & Ross) e critérios de triagem para TARE/ARFID.
-import { foods, icoAlimento } from './data.js?v=b25035e';
-import { uid, dataBR, num, imprimir } from './util-nutri.js?v=b25035e';
-import { idadeEmAnos, idadeTexto, imc, classificaImcIdade, classificaEstaturaIdade, sinaisProblemFeeder, triagemSeletividade } from './nutri-ref.js?v=b25035e';
-import { avaliar, idadeEmDias, graficoCrescimento } from './crescimento.js?v=b25035e';
-import { alergenicos } from './alergenicos.js?v=b25035e';
+import { foods, icoAlimento } from './data.js?v=51a1f2d';
+import { uid, dataBR, num, imprimir } from './util-nutri.js?v=51a1f2d';
+import { idadeEmAnos, idadeTexto, imc, classificaImcIdade, classificaEstaturaIdade, sinaisProblemFeeder, triagemSeletividade } from './nutri-ref.js?v=51a1f2d';
+import { avaliar, idadeEmDias, graficoCrescimento } from './crescimento.js?v=51a1f2d';
+import { alergenicos } from './alergenicos.js?v=51a1f2d';
 
 const diagnosticos = ['TEA (autismo)', 'TDAH', 'Transtorno do processamento sensorial', 'TARE/ARFID (suspeita ou diagnóstico)', 'Alergia à proteína do leite (APLV)', 'Doença do refluxo', 'Constipação intestinal', 'Prematuridade', 'Atraso do desenvolvimento', 'Disfagia / alteração oromotora', 'Anemia', 'Baixo peso', 'Excesso de peso'];
 const terapias = ['Fonoaudiologia', 'Terapia ocupacional / integração sensorial', 'Psicologia', 'ABA', 'Fisioterapia', 'Psicopedagogia', 'Musicoterapia'];

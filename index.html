@@ -6,17 +6,22 @@
   <meta name="theme-color" content="#7b2ff7">
   <meta name="description" content="Mastigô: sistema para nutricionistas que atendem crianças com seletividade alimentar. Anamnese, plano alimentar com TACO, IBGE e USDA, prescrição em visual law e área da família. Teste 7 dias grátis.">
   <title>Mastigô · Sistema para nutrição infantil e seletividade alimentar</title>
-  <script src="./acesso-guarda.js?v=b25035e"></script>
+  <script src="./acesso-guarda.js?v=51a1f2d"></script>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mastigô">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./entrada.css?v=b25035e">
+  <link rel="stylesheet" href="./entrada.css?v=51a1f2d">
   <script>
     // Links antigos do sistema (ex.: mastigô.com/#entrar, enviado aos pais) continuam abrindo o sistema.
     (function () {
-      var h = location.hash.slice(1), daPagina = ['', 'comecar', 'teste', 'duvidas', 'recursos', 'conteudo'];
+      var h = location.hash.slice(1), daPagina = ['', 'comecar', 'teste', 'duvidas', 'recursos', 'conteudo', 'app'];
       if (daPagina.indexOf(h) < 0) location.replace('./sistema.html' + location.search + location.hash);
     })();
   </script>
@@ -28,6 +33,7 @@
     <a class="marca" href="./" aria-label="Mastigô — início"><img src="./mastigo-logo.svg" alt="Mastigô" width="152" height="40"></a>
     <nav class="topo-links" aria-label="Acessos">
       <a href="./sistema.html#entrar">Área da família</a>
+      <a class="link-app" href="#app">Baixar o app</a>
       <a href="./acesso.html?volta=sistema.html">Entrar</a>
       <a class="botao botao-roxo pequeno" href="#comecar">Testar 7 dias grátis</a>
     </nav>
@@ -121,12 +127,22 @@
       </form>
     </section>
 
+    <section class="app" id="app" aria-labelledby="app-titulo">
+      <div class="app-texto">
+        <h2 id="app-titulo">Leve o Mastigô no celular</h2>
+        <p>Instale o app no iPhone ou no Android e abra o consultório com um toque: anamnese, trilha alimentar, plano e área da família, com a mesma conta e os mesmos dados do computador.</p>
+        <p>O app é instalado pelo próprio navegador do celular, sem loja e sem arquivo para baixar. Por isso nenhum antivírus bloqueia, e ele se atualiza sozinho.</p>
+      </div>
+      <div data-instalar></div>
+    </section>
+
     <section class="duvidas" id="duvidas" aria-labelledby="duvidas-titulo">
       <h2 id="duvidas-titulo">Dúvidas comuns</h2>
       <details><summary>Preciso informar o cartão para testar?</summary><p>Sim. O cartão fica cadastrado no Mercado Pago para que a assinatura continue sem interrupção depois do teste. Nada é cobrado durante os 7 dias.</p></details>
       <details><summary>Quando acontece a primeira cobrança?</summary><p>No 8º dia depois do cadastro, no valor de R$ 89,90. As próximas acontecem todo mês, no mesmo dia.</p></details>
       <details><summary>Como cancelo?</summary><p>No app ou no site do Mercado Pago, em Assinaturas, ou falando com a gente pelos canais de contato no fim desta página. Cancelando durante o teste, você não paga nada.</p></details>
-      <details><summary>Onde ficam os dados dos meus pacientes?</summary><p>Nesta fase, os dados ficam salvos no navegador do aparelho em que você usa o sistema. Use sempre o mesmo navegador e não apague os dados de navegação. O sistema faz uma cópia de segurança por dia (no computador, direto numa pasta que você escolhe) e permite restaurá-la em outro aparelho. A sincronização entre aparelhos está em implantação, com dados criptografados e acesso separado por clínica, conforme a LGPD.</p></details>
+      <details><summary>Onde ficam os dados dos meus pacientes?</summary><p>Na nuvem do Mastigô, num servidor em São Paulo, protegidos pelo seu e-mail e senha: cada conta só enxerga os próprios dados. Tudo é salvo sozinho enquanto você trabalha e abre em qualquer computador ou celular. O servidor guarda uma cópia por dia dos últimos 30 dias.</p></details>
+      <details><summary>Tem aplicativo para celular?</summary><p>Tem. Veja o passo a passo em <a href="#app">Baixar o app</a>: no iPhone, pelo Safari (Compartilhar › Adicionar à Tela de Início); no Android, pelo Chrome (Instalar o app). Não precisa de loja nem de arquivo, por isso nenhum antivírus bloqueia.</p></details>
       <details><summary>Os pais pagam alguma coisa?</summary><p>Não. A área da família faz parte da sua assinatura. Você libera o acesso de cada família pelo sistema.</p></details>
     </section>
   </main>
@@ -134,10 +150,11 @@
   <footer class="rodape">
     <img src="./mastigo-logo-branca.svg" alt="Mastigô" width="130" height="34">
     <p class="slogan">Cada descoberta conta.</p>
-    <nav aria-label="Rodapé"><a href="./acesso.html?volta=sistema.html">Entrar</a><a href="./sistema.html#entrar">Área da família</a><a href="#duvidas">Dúvidas</a><a href="./termos.html">Termos de Uso</a><a href="./privacidade.html">Política de Privacidade</a></nav>
+    <nav aria-label="Rodapé"><a href="./acesso.html?volta=sistema.html">Entrar</a><a href="./sistema.html#entrar">Área da família</a><a href="#app">Baixar o app</a><a href="#duvidas">Dúvidas</a><a href="./termos.html">Termos de Uso</a><a href="./privacidade.html">Política de Privacidade</a></nav>
     <p class="empresa" id="empresa"></p>
   </footer>
 
-  <script type="module" src="./entrada.js?v=b25035e"></script>
+  <script type="module" src="./entrada.js?v=51a1f2d"></script>
+  <script type="module" src="./instalar.js?v=51a1f2d"></script>
 </body>
 </html>

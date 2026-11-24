@@ -1,18 +1,18 @@
 // Agrega os módulos de consultório de nutrição ao app principal.
-import { createFinanceiro, financeiroInicial } from './financeiro.js?v=b25035e';
-import * as nuvem from './nuvem.js?v=b25035e';
-import { createAnamnese } from './anamnese.js?v=b25035e';
-import { createPlano } from './plano.js?v=b25035e';
-import { createPrescricao } from './prescricao.js?v=b25035e';
-import { createPortal } from './portal.js?v=b25035e';
-import { createBiblioteca } from './biblioteca.js?v=b25035e';
-import { createTrilha, trilhaDemo } from './trilha.js?v=b25035e';
-import { createVendas } from './vendas.js?v=b25035e';
-import { createCopia } from './copia.js?v=b25035e';
-import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=b25035e';
-import { SITE } from './config-site.js?v=b25035e';
-import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=b25035e';
-import { formatarTelefone } from './whatsapp.js?v=b25035e';
+import { createFinanceiro, financeiroInicial } from './financeiro.js?v=51a1f2d';
+import * as nuvem from './nuvem.js?v=51a1f2d';
+import { createAnamnese } from './anamnese.js?v=51a1f2d';
+import { createPlano } from './plano.js?v=51a1f2d';
+import { createPrescricao } from './prescricao.js?v=51a1f2d';
+import { createPortal } from './portal.js?v=51a1f2d';
+import { createBiblioteca } from './biblioteca.js?v=51a1f2d';
+import { createTrilha, trilhaDemo } from './trilha.js?v=51a1f2d';
+import { createVendas } from './vendas.js?v=51a1f2d';
+import { createCopia } from './copia.js?v=51a1f2d';
+import { perfilPadrao, lerImagem, uid } from './util-nutri.js?v=51a1f2d';
+import { SITE } from './config-site.js?v=51a1f2d';
+import { lerConta, salvarConta, situacao, diasRestantes, dataBR, moedaBR, verificarAssinatura } from './assinatura.js?v=51a1f2d';
+import { formatarTelefone } from './whatsapp.js?v=51a1f2d';
 
 export const paginasOcultas = { entrar: 'Área da família' };
 
@@ -118,7 +118,7 @@ export function createModulos(ctx) {
 <form id="nuvem-form" class="form-grid"><div class="field"><label for="nv-email">E-mail</label><input id="nv-email" name="email" type="email" required value="${e(c?.email || '')}" autocomplete="email"></div><div class="field"><label for="nv-senha">Senha (mínimo 8 caracteres)</label><input id="nv-senha" name="senha" type="password" minlength="8" required autocomplete="new-password"></div><p class="helper" id="nv-erro" role="alert"></p><div class="form-footer"><span>Já tem conta? Use a mesma senha.</span><button class="button primary" type="submit">Ativar a nuvem</button></div></form></section>`;
   }
   nuvem.aoMudarStatus(st => { const el = document.getElementById('nuvem-status'); if (el && st.estado !== 'erro') el.textContent = st.estado === 'salvando' ? 'Salvando na nuvem…' : `Tudo salvo na nuvem · ${new Date(st.quando || Date.now()).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}.`; });
-  const cartaoAssinatura = () => cartaoNuvem() + cartaoPlano() + cartaoAcessoMaster();
+  const cartaoAssinatura = () => cartaoNuvem() + '<section class="card" style="padding:0;overflow:hidden;border:0"><div data-instalar></div></section>' + cartaoPlano() + cartaoAcessoMaster();
   // Volta do cadastro (?assinatura=teste) ou do Mercado Pago (?assinatura=ok): ativa o teste,
   // preenche os dados profissionais com o cadastro e dá as boas-vindas. Sem servidor, a volta do
   // Mercado Pago não é verificada aqui; a cobrança e o cancelamento valem pelo que está no Mercado Pago.
