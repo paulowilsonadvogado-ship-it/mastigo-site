@@ -1,7 +1,7 @@
 // Service worker do app do Mastigô (instalável no iPhone e no Android, sem loja e sem arquivo para baixar).
 // Estratégia "rede primeiro": sempre busca a versão mais nova do site; a cópia guardada só é usada sem internet.
 // Nunca guarda nada de outros endereços (Supabase, Mercado Pago): os dados continuam indo direto para a nuvem.
-const CACHE = 'mastigo-v2';
+const CACHE = 'mastigo-v3';
 const ESSENCIAIS = ['./sistema.html', './index.html', './acesso.html', './manifest.webmanifest', './icone-192.png', './icone-512.png'];
 
 self.addEventListener('install', ev => {

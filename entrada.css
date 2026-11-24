@@ -175,3 +175,5 @@ p{margin:0}
 .app{max-width:1180px;margin:0 auto;padding:20px 24px 90px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
 .app-texto p{margin-top:14px;color:var(--tinta);font-size:17px;max-width:34em}
 @media (max-width:860px){.app{grid-template-columns:1fr;gap:26px;padding-bottom:70px}}
+.botao-app{background:#ffc400;color:#2a0a5e;display:inline-flex;align-items:center;gap:8px;box-shadow:0 8px 18px rgba(255,170,0,.35)}
+.botao-app:hover{background:#ffcf33}

@@ -23,7 +23,7 @@ const instalado = () => window.matchMedia?.('(display-mode: standalone)').matche
 let pedido = null;   // evento beforeinstallprompt (Chrome/Edge/Samsung)
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.)/.test(location.hostname))) {
-  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=6b4b8f2').catch(() => {}));
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=6ad0b19').catch(() => {}));
 }
 addEventListener('beforeinstallprompt', ev => { ev.preventDefault(); pedido = ev; desenharTodos(); });
 addEventListener('appinstalled', () => { pedido = null; desenharTodos(); });
@@ -75,7 +75,9 @@ function cartao(el) {
     return;
   }
   const passos = PASSOS[aba].map(p => `<li><span>${p}</span></li>`).join('');
-  const botao = pedido ? `<button class="inst-btn" type="button" data-inst="instalar">Instalar o app agora</button>` : '';
+  const dentroDoGuia = !!el.closest('#inst-guia');
+  const botao = pedido ? `<button class="inst-btn" type="button" data-inst="instalar">Instalar o app agora</button>`
+    : (!dentroDeApp && !dentroDoGuia && (ehIOS || ehAndroid)) ? `<button class="inst-btn" type="button" data-inst="guia">${ehIOS ? 'Instalar no iPhone' : 'Instalar no Android'}</button>` : '';
   const sair = ehAndroid ? 'Abrir no Chrome e instalar' : 'Abrir no Safari e instalar';
   const aviso = dentroDeApp
     ? `<button class="inst-btn" type="button" data-inst="sair">${sair}</button>
@@ -93,11 +95,18 @@ function desenharTodos() { estilo(); document.querySelectorAll('[data-instalar]'
 
 document.addEventListener('click', async ev => {
   const lk = ev.target.closest('a[href$="#app"]');
-  if (lk && dentroDeApp && !instalado()) { ev.preventDefault(); abrirFora(); return; }
+  if (lk && !instalado() && (dentroDeApp || ehIOS || ehAndroid)) {
+    ev.preventDefault();
+    if (pedido) { pedido.prompt(); try { await pedido.userChoice; } catch { /* */ } pedido = null; desenharTodos(); return; }
+    guia(true);
+    if (dentroDeApp) abrirFora();
+    return;
+  }
   const b = ev.target.closest('[data-inst]'); if (!b) return;
   const el = b.closest('[data-instalar]'), acao = b.dataset.inst;
   if (acao === 'iphone' || acao === 'android' || acao === 'chromeios') { el.dataset.aba = acao; cartao(el); return; }
   if (acao === 'sair') { abrirFora(b); return; }
+  if (acao === 'guia') { guia(true); return; }
   if (acao === 'fechar') { document.getElementById('inst-guia')?.remove(); return; }
   if (acao === 'instalar' && pedido) { pedido.prompt(); try { await pedido.userChoice; } catch { /* */ } pedido = null; desenharTodos(); return; }
   if (acao === 'copiar') {
@@ -108,9 +117,9 @@ document.addEventListener('click', async ev => {
 // O sistema monta as telas depois: preenche os cartões que forem aparecendo
 new MutationObserver(() => { document.querySelectorAll('[data-instalar]:not([data-inst-pronto])').forEach(el => { el.dataset.instPronto = '1'; estilo(); cartao(el); }); })
   .observe(document.documentElement, { childList: true, subtree: true });
-function guia() {
-  if (!quer || instalado() || document.getElementById('inst-guia')) return;
-  if (dentroDeApp) { try { if (!sessionStorage.getItem('inst-saiu')) { sessionStorage.setItem('inst-saiu', '1'); abrirFora(); } } catch { abrirFora(); } }
+function guia(forcar = false) {
+  if ((!quer && !forcar) || instalado() || document.getElementById('inst-guia')) return;
+  if (dentroDeApp && !forcar) { try { if (!sessionStorage.getItem('inst-saiu')) { sessionStorage.setItem('inst-saiu', '1'); abrirFora(); } } catch { abrirFora(); } }
   const g = document.createElement('div'); g.id = 'inst-guia'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-label', 'Instalar o app do Mastigô');
   const seta = ehSafariIOS ? '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v15M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
   g.innerHTML = `<button class="fechar" type="button" data-inst="fechar">Fechar</button><div class="inst-guia-in"><div data-instalar data-titulo="${dentroDeApp ? 'Abra no navegador para instalar' : 'Falta só um passo'}"></div></div>${seta}`;
