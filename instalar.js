@@ -6,11 +6,24 @@ const ua = navigator.userAgent || '';
 const ehIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const ehAndroid = /Android/i.test(ua);
 const dentroDeApp = /Instagram|FBAN|FBAV|FB_IAB|Line\/|WhatsApp|TikTok|musical_ly|Snapchat/i.test(ua);
+const ehChromeIOS = ehIOS && /CriOS/.test(ua);
+const ehSafariIOS = ehIOS && !dentroDeApp && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+const HOST = 'xn--mastig-nxa.com';
+const quer = new URLSearchParams(location.search).has('instalar');
+// Sai do navegador do Instagram direto para o Safari (iPhone) ou Chrome (Android), já na tela de instalar.
+// Se o atalho não funcionar (o Instagram às vezes bloqueia), o cartão mostra o caminho manual.
+function abrirFora(botao) {
+  const destino = `${HOST}/index.html?instalar=1`;
+  if (ehAndroid) location.href = `intent://${destino}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent('https://' + destino)};end`;
+  else location.href = `x-safari-https://${destino}`;
+  setTimeout(() => { if (document.visibilityState === 'visible') { falhouSaida = true; desenharTodos(); if (botao) botao.textContent = 'Não abriu? Siga o passo abaixo'; } }, 1600);
+}
+let falhouSaida = false;
 const instalado = () => window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
 let pedido = null;   // evento beforeinstallprompt (Chrome/Edge/Samsung)
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.)/.test(location.hostname))) {
-  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=51a1f2d').catch(() => {}));
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=6b4b8f2').catch(() => {}));
 }
 addEventListener('beforeinstallprompt', ev => { ev.preventDefault(); pedido = ev; desenharTodos(); });
 addEventListener('appinstalled', () => { pedido = null; desenharTodos(); });
@@ -22,8 +35,9 @@ const ICO = {
   ok: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 };
 const PASSOS = {
-  iphone: [`Abra <b>mastigô.com</b> no <b>Safari</b>.`, `Toque em <b>Compartilhar</b> <span class="inst-ic">${ICO.share}</span> (na barra de baixo).`, `Role e toque em <b>Adicionar à Tela de Início</b> <span class="inst-ic">${ICO.mais}</span>.`, `Toque em <b>Adicionar</b>. O ícone do Mastigô aparece junto dos outros apps.`],
-  android: [`Abra <b>mastigô.com</b> no <b>Chrome</b>.`, `Toque em <b>Instalar o app</b> aqui ou no menu <span class="inst-ic">${ICO.pontos}</span>.`, `Confirme em <b>Instalar</b>. O Mastigô entra na lista de apps do celular.`]
+  iphone: [`Toque em <b>Compartilhar</b> <span class="inst-ic">${ICO.share}</span> na barra de baixo. <small>(No iOS 26, se não aparecer, toque em <b>···</b> e depois em <b>Compartilhar</b>.)</small>`, `Role a lista e toque em <b>Adicionar à Tela de Início</b> <span class="inst-ic">${ICO.mais}</span>.`, `Deixe <b>Abrir como app web</b> ligado (se aparecer) e toque em <b>Adicionar</b>. Pronto: o ícone do Mastigô fica junto dos outros apps.`],
+  chromeios: [`Toque em <b>Compartilhar</b> <span class="inst-ic">${ICO.share}</span> ao lado do endereço, no alto.`, `Toque em <b>Adicionar à Tela de Início</b> <span class="inst-ic">${ICO.mais}</span>.`, `Toque em <b>Adicionar</b>. Pronto: o ícone do Mastigô fica junto dos outros apps.`],
+  android: [`Toque em <b>Instalar o app agora</b> (aqui em cima) ou no menu <span class="inst-ic">${ICO.pontos}</span> › <b>Instalar app</b>.`, `Confirme em <b>Instalar</b>. O Mastigô entra na lista de apps do celular.`]
 };
 
 function estilo() {
@@ -41,12 +55,20 @@ function estilo() {
 .inst-btn{border:0;border-radius:999px;padding:13px 20px;font:inherit;font-weight:800;font-size:1rem;cursor:pointer;background:#ffc400;color:#2a0a5e;box-shadow:0 8px 18px rgba(0,0,0,.2)}
 .inst-btn:focus-visible,.inst-abas button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .inst-nota{font-size:.82rem!important;opacity:.92}.inst-ok{display:flex;gap:10px;align-items:center;font-weight:700}
-.inst-aviso{background:#fff;color:#2a0a5e;border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.45}`;
+.inst-aviso{background:#fff;color:#2a0a5e;border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.45}
+.inst-sec{background:#efe7ff;color:#5a1fc0;box-shadow:none}.inst small{opacity:.9}.inst-abas button{font-size:.85rem;padding:9px 6px}
+#inst-guia{position:fixed;inset:0;z-index:9999;background:rgba(26,8,60,.88);overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:inherit}
+.inst-guia-in{min-height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:66px 16px 100px}
+#inst-guia .inst{max-width:520px;margin:0 auto;width:100%}
+#inst-guia .seta{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:64px;height:64px;color:#ffc400;animation:inst-pula 1s ease-in-out infinite}
+#inst-guia .fechar{position:fixed;z-index:2;right:14px;top:14px;background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700}
+@keyframes inst-pula{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,12px)}}
+@media (prefers-reduced-motion:reduce){#inst-guia .seta{animation:none}}`;
   document.head.appendChild(s);
 }
 
 function cartao(el) {
-  const aba = el.dataset.aba || (ehAndroid ? 'android' : 'iphone');
+  const aba = el.dataset.aba || (ehAndroid ? 'android' : ehChromeIOS ? 'chromeios' : 'iphone');
   const icone = './icone-192.png';
   if (instalado()) {
     el.innerHTML = `<div class="inst"><div class="inst-topo"><img src="${icone}" alt=""><div><h3>App instalado</h3><p class="inst-ok">${ICO.ok} Você já está usando o Mastigô como app neste aparelho.</p></div></div></div>`;
@@ -54,13 +76,15 @@ function cartao(el) {
   }
   const passos = PASSOS[aba].map(p => `<li><span>${p}</span></li>`).join('');
   const botao = pedido ? `<button class="inst-btn" type="button" data-inst="instalar">Instalar o app agora</button>` : '';
+  const sair = ehAndroid ? 'Abrir no Chrome e instalar' : 'Abrir no Safari e instalar';
   const aviso = dentroDeApp
-    ? `<div class="inst-aviso"><b>Você abriu pelo Instagram.</b> O navegador do Instagram não instala apps. Toque nos <b>três pontinhos</b> no canto de cima da tela e escolha <b>Abrir no navegador</b> (ou <b>Abrir no Safari/Chrome</b>). <button class="inst-btn" type="button" data-inst="copiar" style="margin-top:10px;width:100%">Copiar o endereço</button></div>`
+    ? `<button class="inst-btn" type="button" data-inst="sair">${sair}</button>
+       <div class="inst-aviso">${falhouSaida ? '<b>O Instagram não deixou abrir sozinho.</b> ' : ''}Se não abrir, toque nos <b>três pontinhos</b> no canto de cima e escolha <b>Abrir no navegador</b> (pode aparecer como <b>Abrir no navegador externo</b> ou <b>Abrir no Safari</b>). Depois siga o passo a passo abaixo. <button class="inst-btn inst-sec" type="button" data-inst="copiar" style="margin-top:10px;width:100%">Copiar o endereço</button></div>`
     : '';
   el.innerHTML = `<div class="inst">
-  <div class="inst-topo"><img src="${icone}" alt=""><div><h3>Baixe o app do Mastigô</h3><p>Grátis, direto do site, sem loja e sem arquivo para baixar.</p></div></div>
+  <div class="inst-topo"><img src="${icone}" alt=""><div><h3>${el.dataset.titulo || 'Baixe o app do Mastigô'}</h3><p>${el.dataset.titulo ? 'Siga os toques abaixo e o Mastigô vira um app no seu celular.' : 'Grátis, direto do site, sem loja e sem arquivo para baixar.'}</p></div></div>
   ${aviso}${botao}
-  <div class="inst-abas" role="tablist"><button type="button" role="tab" aria-selected="${aba === 'iphone'}" data-inst="iphone">iPhone</button><button type="button" role="tab" aria-selected="${aba === 'android'}" data-inst="android">Android</button></div>
+  <div class="inst-abas" role="tablist"><button type="button" role="tab" aria-selected="${aba === 'iphone'}" data-inst="iphone">iPhone (Safari)</button><button type="button" role="tab" aria-selected="${aba === 'chromeios'}" data-inst="chromeios">iPhone (Chrome)</button><button type="button" role="tab" aria-selected="${aba === 'android'}" data-inst="android">Android</button></div>
   <ol>${passos}</ol>
   <p class="inst-nota">É o próprio Safari ou Chrome que instala, por isso o celular não mostra alerta de vírus. O app abre em tela cheia, com ícone próprio, e usa a mesma conta e os mesmos dados do site.</p>
 </div>`;
@@ -68,9 +92,13 @@ function cartao(el) {
 function desenharTodos() { estilo(); document.querySelectorAll('[data-instalar]').forEach(cartao); }
 
 document.addEventListener('click', async ev => {
+  const lk = ev.target.closest('a[href$="#app"]');
+  if (lk && dentroDeApp && !instalado()) { ev.preventDefault(); abrirFora(); return; }
   const b = ev.target.closest('[data-inst]'); if (!b) return;
   const el = b.closest('[data-instalar]'), acao = b.dataset.inst;
-  if (acao === 'iphone' || acao === 'android') { el.dataset.aba = acao; cartao(el); return; }
+  if (acao === 'iphone' || acao === 'android' || acao === 'chromeios') { el.dataset.aba = acao; cartao(el); return; }
+  if (acao === 'sair') { abrirFora(b); return; }
+  if (acao === 'fechar') { document.getElementById('inst-guia')?.remove(); return; }
   if (acao === 'instalar' && pedido) { pedido.prompt(); try { await pedido.userChoice; } catch { /* */ } pedido = null; desenharTodos(); return; }
   if (acao === 'copiar') {
     const url = 'https://mastigô.com/';
@@ -80,5 +108,13 @@ document.addEventListener('click', async ev => {
 // O sistema monta as telas depois: preenche os cartões que forem aparecendo
 new MutationObserver(() => { document.querySelectorAll('[data-instalar]:not([data-inst-pronto])').forEach(el => { el.dataset.instPronto = '1'; estilo(); cartao(el); }); })
   .observe(document.documentElement, { childList: true, subtree: true });
-if (document.readyState !== 'loading') desenharTodos(); else document.addEventListener('DOMContentLoaded', desenharTodos);
+function guia() {
+  if (!quer || instalado() || document.getElementById('inst-guia')) return;
+  if (dentroDeApp) { try { if (!sessionStorage.getItem('inst-saiu')) { sessionStorage.setItem('inst-saiu', '1'); abrirFora(); } } catch { abrirFora(); } }
+  const g = document.createElement('div'); g.id = 'inst-guia'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-label', 'Instalar o app do Mastigô');
+  const seta = ehSafariIOS ? '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v15M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+  g.innerHTML = `<button class="fechar" type="button" data-inst="fechar">Fechar</button><div class="inst-guia-in"><div data-instalar data-titulo="${dentroDeApp ? 'Abra no navegador para instalar' : 'Falta só um passo'}"></div></div>${seta}`;
+  document.body.appendChild(g);
+}
+if (document.readyState !== 'loading') { desenharTodos(); guia(); } else document.addEventListener('DOMContentLoaded', () => { desenharTodos(); guia(); });
 export { desenharTodos };
