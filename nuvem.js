@@ -97,9 +97,11 @@ function pacote() {
   return { ...estado, __conta: ler(CONTA) || estado.__conta || null };
 }
 // Ao entrar em outro aparelho: grava aqui o que veio da nuvem
-export function aplicarNoAparelho(dados) {
+export function aplicarNoAparelho(dados, quando = 0) {
   if (!dados) return false;
   const { __conta, ...estado } = dados;
+  // Guarda a data da versão trazida, para a próxima abertura não achar que a nuvem continua "mais nova"
+  if (!estado.salvoEm && quando) estado.salvoEm = new Date(quando).toISOString();
   if (Array.isArray(estado.patients)) gravar(ESTADO, estado);
   // A conta deste aparelho vale mais (acabou de voltar do Mercado Pago, por exemplo); a da nuvem serve para aparelho novo
   const local = ler(CONTA);
@@ -132,19 +134,30 @@ export const salvarJa = () => (timer || pendente ? enviarAgora() : Promise.resol
 
 // Ao abrir o sistema: se a nuvem tiver algo mais novo (feito em outro aparelho), traz para cá;
 // se este aparelho tiver algo mais novo (feito sem internet), envia. Devolve true se a tela precisa recarregar.
+// Evita laço de recarregamento: no máximo uma recarga por sincronização a cada 30 s (nesta aba)
+const RECARGA = 'mastigo-recarga-nuvem';
+function recarregouHaPouco() { try { return Date.now() - Number(sessionStorage.getItem(RECARGA) || 0) < 30_000; } catch { return false; } }
+function marcarRecarga() { try { sessionStorage.setItem(RECARGA, String(Date.now())); } catch { /* */ } }
 export async function sincronizarAoAbrir() {
   if (!sessaoLocal()) { avisar('desligado'); return false; }
   avisar('salvando');
   try {
     const remoto = await baixar(), local = ler(ESTADO);
-    const tRemoto = Date.parse(remoto?.dados?.salvoEm || remoto?.atualizado_em || '') || 0;
+    const dados = remoto?.dados;
+    const tRemoto = Date.parse(dados?.salvoEm || remoto?.atualizado_em || '') || 0;
     const tLocal = Date.parse(local?.salvoEm || '') || 0;
-    if (Array.isArray(remoto?.dados?.patients) && (tRemoto > tLocal || !local || !(local.patients?.length || local.entries?.length))) {
-      if (JSON.stringify(remoto.dados) !== JSON.stringify(pacote())) { aplicarNoAparelho(remoto.dados); avisar('salvo', { quando: remoto.atualizado_em }); return true; }
-      avisar('salvo', { quando: remoto.atualizado_em }); return false;
+    const temAlgo = e => !!(e && ((e.patients?.length || 0) + (e.entries?.length || 0)));
+    // Traz da nuvem só quando ela é mais nova, ou quando este aparelho está vazio e a nuvem tem crianças/registros.
+    // (Comparar o texto dos dados não serve: o banco devolve os campos em outra ordem.)
+    const trazer = Array.isArray(dados?.patients) && (tRemoto > tLocal || (!temAlgo(local) && temAlgo(dados)));
+    if (trazer && !recarregouHaPouco()) {
+      aplicarNoAparelho(dados, tRemoto);
+      marcarRecarga();
+      avisar('salvo', { quando: remoto.atualizado_em });
+      return true;
     }
-    if (local) await enviar(pacote());
-    avisar('salvo', { quando: new Date().toISOString() });
+    if (local && !trazer) await enviar(pacote());
+    avisar('salvo', { quando: trazer ? remoto.atualizado_em : new Date().toISOString() });
   } catch (e) { avisar('erro', { erro: e.message || 'Sem conexão' }); }
   return false;
 }

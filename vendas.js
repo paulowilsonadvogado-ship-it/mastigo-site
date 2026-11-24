@@ -3,10 +3,10 @@
 // que tem o token em segredo, grava o relatório no Supabase (tabela relatorio_vendas). Aqui a dona entra
 // com a conta dela na nuvem e lê; só contas marcadas em public.donos conseguem ler
 // (database/supabase_002_vendas.sql). Nenhum token é pedido nem guardado no navegador.
-import { SITE } from './config-site.js?v=21022aa';
-import { moedaBR } from './assinatura.js?v=21022aa';
-import { baixarCSV } from './util-nutri.js?v=21022aa';
-import * as nuvem from './nuvem.js?v=21022aa';
+import { SITE } from './config-site.js?v=b25035e';
+import { moedaBR } from './assinatura.js?v=b25035e';
+import { baixarCSV } from './util-nutri.js?v=b25035e';
+import * as nuvem from './nuvem.js?v=b25035e';
 
 const CHAVE_TOKEN = 'mastigo-mp-token'; // token antigo, só para apagar de navegadores que o guardaram
 const MP = {
