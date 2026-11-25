@@ -1,7 +1,7 @@
 // Service worker do app do Mastigô (instalável no iPhone e no Android, sem loja e sem arquivo para baixar).
 // Estratégia "rede primeiro": sempre busca a versão mais nova do site; a cópia guardada só é usada sem internet.
 // Nunca guarda nada de outros endereços (Supabase, Mercado Pago): os dados continuam indo direto para a nuvem.
-const CACHE = 'mastigo-v5';
+const CACHE = 'mastigo-v6';
 const ESSENCIAIS = ['./sistema.html', './index.html', './acesso.html', './manifest.webmanifest', './icone-192.png', './icone-512.png'];
 
 self.addEventListener('install', ev => {
@@ -14,6 +14,7 @@ self.addEventListener('fetch', ev => {
   const req = ev.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;   // só o próprio site
   if (url.pathname.endsWith('/assinantes.json')) return;                      // lista sempre fresca
+  if (/\.(mp4|webm)$/.test(url.pathname)) return;                             // vídeos: direto da rede
   ev.respondWith(
     fetch(req).then(res => {
       if (res.ok && res.type === 'basic') { const copia = res.clone(); caches.open(CACHE).then(c => c.put(req, copia)).catch(() => {}); }

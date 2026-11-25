@@ -24,7 +24,7 @@ const instalado = () => window.matchMedia?.('(display-mode: standalone)').matche
 let pedido = window.__mastigoPedido || null;   // evento beforeinstallprompt (Chrome/Edge/Samsung)
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.)/.test(location.hostname))) {
-  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=6898bfc').catch(() => {}));
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=6077276').catch(() => {}));
 }
 addEventListener('beforeinstallprompt', ev => { ev.preventDefault(); pedido = ev; desenharTodos(); });
 // Um toque e instala: o pedido do Chrome/Samsung (Android) ou a Web Install API (navigator.install), onde existir.
@@ -68,6 +68,9 @@ function estilo() {
 #inst-guia{position:fixed;inset:0;z-index:9999;background:rgba(26,8,60,.88);overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:inherit}
 .inst-guia-in{min-height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:66px 16px 100px}
 #inst-guia .inst{max-width:520px;margin:0 auto;width:100%}
+.inst-guia-vid{margin:0 auto 14px;width:min(190px,48vw);text-align:center}
+.inst-guia-vid video{display:block;width:100%;aspect-ratio:9/16;border-radius:20px;background:#7b2ff7;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.inst-guia-vid figcaption{margin-top:8px;color:#fff;font-weight:700;font-size:.9rem}
 #inst-guia .seta{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:64px;height:64px;color:#ffc400;animation:inst-pula 1s ease-in-out infinite}
 #inst-guia .fechar{position:fixed;z-index:2;right:14px;top:14px;background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700}
 @keyframes inst-pula{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,12px)}}
@@ -125,13 +128,44 @@ document.addEventListener('click', async ev => {
 // O sistema monta as telas depois: preenche os cartões que forem aparecendo
 new MutationObserver(() => { document.querySelectorAll('[data-instalar]:not([data-inst-pronto])').forEach(el => { el.dataset.instPronto = '1'; estilo(); cartao(el); }); })
   .observe(document.documentElement, { childList: true, subtree: true });
+// Vídeos de instalação (videos/instalar-iphone.mp4 e instalar-android.mp4, sem som): tocam sozinhos quando aparecem
+// na tela e pausam quando saem; quem pede menos movimento no aparelho dá o play quando quiser.
+const VIDEO = { iphone: 'iPhone', android: 'Android' };
+const qualVideo = () => (ehAndroid ? 'android' : 'iphone');
+const poucoMovimento = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+function trocarVideo(v, qual) {
+  if (v.dataset.qual === qual) return;
+  v.dataset.qual = qual; v.poster = `./videos/instalar-${qual}.jpg`; v.src = `./videos/instalar-${qual}.mp4`;
+  v.setAttribute('aria-label', `Vídeo sem som: como instalar o app do Mastigô no ${VIDEO[qual]}, passo a passo`);
+}
+const olhoVideo = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => {
+  const v = e.target;
+  if (e.isIntersecting && !poucoMovimento()) { v.play?.().catch(() => {}); } else if (!e.isIntersecting) v.pause?.();
+}), { threshold: .45 }) : null;
+function prepararVideos() {
+  document.querySelectorAll('[data-video-app]:not([data-vid-pronto])').forEach(fig => {
+    fig.dataset.vidPronto = '1';
+    const v = fig.querySelector('video'); const qual = qualVideo();
+    trocarVideo(v, qual);
+    fig.querySelectorAll('[data-vid]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.vid === qual)));
+    olhoVideo?.observe(v);
+  });
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-vid]'); if (!b) return;
+  const fig = b.closest('[data-video-app]'), v = fig.querySelector('video');
+  fig.querySelectorAll('[data-vid]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+  trocarVideo(v, b.dataset.vid); v.play?.().catch(() => {});
+});
 function guia(forcar = false) {
   if ((!quer && !forcar) || instalado() || document.getElementById('inst-guia')) return;
   if (dentroDeApp && !forcar) { try { if (!sessionStorage.getItem('inst-saiu')) { sessionStorage.setItem('inst-saiu', '1'); abrirFora(); } } catch { abrirFora(); } }
   const g = document.createElement('div'); g.id = 'inst-guia'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-label', 'Instalar o app do Mastigô');
   const seta = ehSafariIOS ? '<svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v15M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
-  g.innerHTML = `<button class="fechar" type="button" data-inst="fechar">Fechar</button><div class="inst-guia-in"><div data-instalar data-titulo="${dentroDeApp ? 'Abra no navegador para instalar' : 'Falta só um passo'}"></div></div>${seta}`;
+  const q = qualVideo();
+  const video = `<figure class="inst-guia-vid"><video src="./videos/instalar-${q}.mp4" poster="./videos/instalar-${q}.jpg" muted playsinline loop controls ${poucoMovimento() ? '' : 'autoplay'} aria-label="Vídeo sem som: como instalar o app do Mastigô no ${VIDEO[q]}, passo a passo"></video><figcaption>Veja como fazer</figcaption></figure>`;
+  g.innerHTML = `<button class="fechar" type="button" data-inst="fechar">Fechar</button><div class="inst-guia-in">${video}<div data-instalar data-titulo="${dentroDeApp ? 'Abra no navegador para instalar' : 'Falta só um passo'}"></div></div>${seta}`;
   document.body.appendChild(g);
 }
-if (document.readyState !== 'loading') { desenharTodos(); guia(); } else document.addEventListener('DOMContentLoaded', () => { desenharTodos(); guia(); });
+if (document.readyState !== 'loading') { desenharTodos(); prepararVideos(); guia(); } else document.addEventListener('DOMContentLoaded', () => { desenharTodos(); prepararVideos(); guia(); });
 export { desenharTodos };
