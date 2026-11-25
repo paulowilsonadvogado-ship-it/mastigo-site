@@ -20,12 +20,20 @@ function abrirFora(botao) {
 }
 let falhouSaida = false;
 const instalado = () => window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
-let pedido = null;   // evento beforeinstallprompt (Chrome/Edge/Samsung)
+// O Chrome pode oferecer a instalação antes deste arquivo carregar: o <head> guarda o pedido em window.__mastigoPedido.
+let pedido = window.__mastigoPedido || null;   // evento beforeinstallprompt (Chrome/Edge/Samsung)
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.)/.test(location.hostname))) {
-  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=6ad0b19').catch(() => {}));
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=4c202cc').catch(() => {}));
 }
 addEventListener('beforeinstallprompt', ev => { ev.preventDefault(); pedido = ev; desenharTodos(); });
+// Um toque e instala: o pedido do Chrome/Samsung (Android) ou a Web Install API (navigator.install), onde existir.
+// O iPhone não tem nenhum dos dois: lá a Apple só deixa instalar pelo menu Compartilhar, então abre o guia.
+async function instalarAgora(botao) {
+  if (pedido) { const p = pedido; pedido = null; p.prompt(); try { await p.userChoice; } catch { /* */ } desenharTodos(); return true; }
+  if (typeof navigator.install === 'function' && !ehIOS) { try { await navigator.install(); desenharTodos(); return true; } catch { /* recusou ou não disponível */ } }
+  return false;
+}
 addEventListener('appinstalled', () => { pedido = null; desenharTodos(); });
 
 const ICO = {
@@ -37,7 +45,7 @@ const ICO = {
 const PASSOS = {
   iphone: [`Toque em <b>Compartilhar</b> <span class="inst-ic">${ICO.share}</span> na barra de baixo. <small>(No iOS 26, se não aparecer, toque em <b>···</b> e depois em <b>Compartilhar</b>.)</small>`, `Role a lista e toque em <b>Adicionar à Tela de Início</b> <span class="inst-ic">${ICO.mais}</span>.`, `Deixe <b>Abrir como app web</b> ligado (se aparecer) e toque em <b>Adicionar</b>. Pronto: o ícone do Mastigô fica junto dos outros apps.`],
   chromeios: [`Toque em <b>Compartilhar</b> <span class="inst-ic">${ICO.share}</span> ao lado do endereço, no alto.`, `Toque em <b>Adicionar à Tela de Início</b> <span class="inst-ic">${ICO.mais}</span>.`, `Toque em <b>Adicionar</b>. Pronto: o ícone do Mastigô fica junto dos outros apps.`],
-  android: [`Toque em <b>Instalar o app agora</b> (aqui em cima) ou no menu <span class="inst-ic">${ICO.pontos}</span> › <b>Instalar app</b>.`, `Confirme em <b>Instalar</b>. O Mastigô entra na lista de apps do celular.`]
+  android: [`Toque nos três pontinhos <span class="inst-ic">${ICO.pontos}</span> do Chrome, no canto de cima.`, `Toque em <b>Instalar app</b> (em alguns celulares aparece <b>Adicionar à tela inicial</b>) e depois em <b>Instalar</b>. O Mastigô entra na lista de apps do celular.`]
 };
 
 function estilo() {
@@ -97,7 +105,7 @@ document.addEventListener('click', async ev => {
   const lk = ev.target.closest('a[href$="#app"]');
   if (lk && !instalado() && (dentroDeApp || ehIOS || ehAndroid)) {
     ev.preventDefault();
-    if (pedido) { pedido.prompt(); try { await pedido.userChoice; } catch { /* */ } pedido = null; desenharTodos(); return; }
+    if (await instalarAgora()) return;
     guia(true);
     if (dentroDeApp) abrirFora();
     return;
@@ -106,9 +114,9 @@ document.addEventListener('click', async ev => {
   const el = b.closest('[data-instalar]'), acao = b.dataset.inst;
   if (acao === 'iphone' || acao === 'android' || acao === 'chromeios') { el.dataset.aba = acao; cartao(el); return; }
   if (acao === 'sair') { abrirFora(b); return; }
-  if (acao === 'guia') { guia(true); return; }
+  if (acao === 'guia') { if (!(await instalarAgora(b))) guia(true); return; }
   if (acao === 'fechar') { document.getElementById('inst-guia')?.remove(); return; }
-  if (acao === 'instalar' && pedido) { pedido.prompt(); try { await pedido.userChoice; } catch { /* */ } pedido = null; desenharTodos(); return; }
+  if (acao === 'instalar') { if (!(await instalarAgora(b))) guia(true); return; }
   if (acao === 'copiar') {
     const url = 'https://mastigô.com/';
     try { await navigator.clipboard.writeText(url); b.textContent = 'Endereço copiado: cole no Safari ou Chrome'; } catch { b.textContent = url; }
