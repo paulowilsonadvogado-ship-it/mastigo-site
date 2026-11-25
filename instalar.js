@@ -24,7 +24,7 @@ const instalado = () => window.matchMedia?.('(display-mode: standalone)').matche
 let pedido = window.__mastigoPedido || null;   // evento beforeinstallprompt (Chrome/Edge/Samsung)
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || /^(localhost|127\.)/.test(location.hostname))) {
-  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=4c202cc').catch(() => {}));
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=6898bfc').catch(() => {}));
 }
 addEventListener('beforeinstallprompt', ev => { ev.preventDefault(); pedido = ev; desenharTodos(); });
 // Um toque e instala: o pedido do Chrome/Samsung (Android) ou a Web Install API (navigator.install), onde existir.

@@ -1,6 +1,6 @@
-import { foods, foodGroups, stages, initialState, summarize, normalize, today,icoAlimento} from './data.js?v=4c202cc';
-import { createModulos, paginasConsultorio, paginasOcultas } from './modulos.js?v=4c202cc';
-import { agendar as agendarNuvem, sincronizarAoAbrir } from './nuvem.js?v=4c202cc';
+import { foods, foodGroups, stages, initialState, summarize, normalize, today,icoAlimento} from './data.js?v=6898bfc';
+import { createModulos, paginasConsultorio, paginasOcultas } from './modulos.js?v=6898bfc';
+import { agendar as agendarNuvem, sincronizarAoAbrir } from './nuvem.js?v=6898bfc';
 const $ = s => document.querySelector(s);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons = {
